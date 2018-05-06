@@ -142,9 +142,10 @@ nav h1 a {
 /* ====================== Restaurant Filtering ====================== */
 .filter-options {
   width: 100%;
-  height: 50px;
+  height: 100%;
   background-color: #3397DB;
   align-items: center;
+  padding: calc(4vw) 0;
 }
 
 .filter-options h2 {
@@ -164,7 +165,8 @@ nav h1 a {
   letter-spacing: 0;
   margin: 10px;
   padding: 0 10px;
-  width: 200px;
+  min-width: 200px;
+  width: calc(100vw - 20px);
 }
 
 /* ====================== Restaurant Listing ====================== */
@@ -184,16 +186,15 @@ nav h1 a {
   min-height: 380px;
   padding: 0 30px 25px;
   text-align: left;
-  width: 270px;
+  // 30px padding on li, 15px margin on li, 15px padding on container * 2 = 120
+  width: calc(100vw - 120px);
 }
 
 #restaurants-list .restaurant-img {
   background-color: #ccc;
   display: block;
-  margin: 0;
-  max-width: 100%;
-  min-height: 248px;
-  min-width: 100%;
+  margin: 10px 0 0;
+  width: 100%;
 }
 
 #restaurants-list li h1 {
@@ -329,4 +330,16 @@ nav h1 a {
 
 #restaurant-hours td {
   color: #666;
+}
+
+
+
+@media screen and (max-width: 400px) {
+  background-color: red;
+}
+@media screen and (min-width: 400px) and (max-width: 600px) {
+  background: green;
+}
+@media screen and (min-width: 600px) {
+  background: blue;
 }
