@@ -67,6 +67,8 @@ section {
 #maincontent {
   background-color: #f3f3f3;
   min-height: 100%;
+  display: flex;
+  flex-wrap: wrap;
 }
 
 #footer {
@@ -93,10 +95,11 @@ nav h1 {
 
 nav h1 a {
   color: #fff;
-  font-size: 14pt;
+  font-size: calc(3vw);
   font-weight: 200;
   letter-spacing: 10px;
   text-transform: uppercase;
+  line-height: 80px;
 }
 
 #breadcrumb {
@@ -237,9 +240,6 @@ nav h1 a {
 .inside #map-container {
   background: blue none repeat scroll 0 0;
   height: 87%;
-  position: fixed;
-  right: 0;
-  top: 80px;
   width: 50%;
 }
 
