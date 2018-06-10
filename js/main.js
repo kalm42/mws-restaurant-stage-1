@@ -5,6 +5,29 @@ var map
 var markers = []
 
 /**
+ * Register the service worker
+ */
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js')
+    .then((worker) => {
+      if (worker.installing) {
+        console.log('Service worker installing.', worker);
+        return;
+      } else if (worker.waiting) {
+        console.log('Service worker is waiting.', worker);
+        return;
+      } else if (worker.active) {
+        console.log('Service worker is active.', worker);
+        return;
+      }
+      return;
+    })
+    .catch((err) => {
+      console.log(`Service worker failed with ${error}.`);
+    })
+}
+
+/**
  * Fetch neighborhoods and cuisines as soon as the page is loaded.
  */
 document.addEventListener('DOMContentLoaded', (event) => {
@@ -84,6 +107,18 @@ window.initMap = () => {
 }
 
 /**
+ * Toggle fix-map class on map-container
+ */
+const mapContainer = document.getElementById('map-container');
+window.addEventListener('scroll', function (event) {
+  if (window.innerWidth > 700 && window.scrollY > 80) {
+    mapContainer.classList.add('fix-map');
+  } else {
+    mapContainer.classList.remove('fix-map');
+  }
+});
+
+/**
  * Update page and map for current restaurants.
  */
 updateRestaurants = () => {
@@ -96,9 +131,11 @@ updateRestaurants = () => {
   const cuisine = cSelect[cIndex].value;
   const neighborhood = nSelect[nIndex].value;
 
+  console.log('neighborhood', neighborhood);
+
   DBHelper.fetchRestaurantByCuisineAndNeighborhood(cuisine, neighborhood, (error, restaurants) => {
     if (error) { // Got an error!
-      console.error(error);
+      throw new Error(error);
     } else {
       resetRestaurants(restaurants);
       fillRestaurantsHTML();
@@ -140,7 +177,9 @@ createRestaurantHTML = (restaurant) => {
 
   const image = document.createElement('img');
   image.className = 'restaurant-img';
+  image.alt = `A photo of ${restaurant.name}`;
   image.src = DBHelper.imageUrlForRestaurant(restaurant);
+  // image.alt = ``;
   li.append(image);
 
   const name = document.createElement('h1');

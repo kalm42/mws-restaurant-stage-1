@@ -169,6 +169,17 @@ nav h1 a {
   width: calc(100vw - 20px);
 }
 
+@media screen and (min-width: 700px) {
+  .filter-options select {
+    width: calc(50vw - 20px);
+  }
+}
+@media screen and (min-width: 900px) {
+  .filter-options select {
+    width: calc(33vw - 20px);
+  }
+}
+
 /* ====================== Restaurant Listing ====================== */
 #restaurants-list {
   background-color: #f3f3f3;
@@ -186,8 +197,19 @@ nav h1 a {
   min-height: 380px;
   padding: 0 30px 25px;
   text-align: left;
-  // 30px padding on li, 15px margin on li, 15px padding on container * 2 = 120
+  /*30px padding on li, 15px margin on li, 15px padding on container * 2 = 120*/
   width: calc(100vw - 120px);
+}
+
+@media screen and (min-width: 700px) {
+  #restaurants-list li {
+    width: calc(50vw - 120px);
+  }
+}
+@media screen and (min-width: 900px) {
+  #restaurants-list li {
+    width: calc(33vw - 120px);
+  }
 }
 
 #restaurants-list .restaurant-img {
@@ -230,22 +252,27 @@ nav h1 a {
 header {
   width: 100%;
 }
-
+.fix-map {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: calc(100vh);
+}
 #map-container {
   background: blue none repeat scroll 0 0;
-  height: calc(70vw);
+  height: calc(50vw);
   width: 100%;
 }
 @media screen and (min-width: 700px) {
   #map-container {
     order: 1;
     height: calc(15vw + 550px);
-    width: calc(48vw);
+    width: calc(50vw);
   }
 }
 @media screen and (min-width: 900px) {
   #map-container {
-    width: calc(70vw);
+    width: calc(67vw);
   }
 }
 
@@ -256,6 +283,23 @@ header {
 }
 
 #footer {
+}
+
+
+.restaurants-container {
+  width: calc(100vw);
+}
+
+@media screen and (min-width: 700px) {
+  .restaurants-container {
+    width: calc(50vw);
+  }
+}
+
+@media screen and (min-width: 900px) {
+  .restaurants-container {
+    width: calc(33vw);
+  }
 }
 
 #restaurant-name {
@@ -299,7 +343,7 @@ header {
 }
 @media screen and (min-width: 700px) {
   #restaurant-container {
-    width: calc(46vw);
+    width: calc(50vw - 40px);
     order: 0;
   }
   #reviews-container {
@@ -309,7 +353,7 @@ header {
 }
 @media screen and (min-width: 900px) {
   #restaurant-container {
-    width: calc(25vw);
+    width: calc(33vw - 40px);
   }
 }
 
