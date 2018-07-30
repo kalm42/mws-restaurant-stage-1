@@ -1,4 +1,4 @@
-const staticCacheName = 'mws-rs-v3'
+const staticCacheName = 'mws-rs-v1'
 
 self.addEventListener('install', event => {
   console.log('V1 installing…');
