@@ -3,7 +3,6 @@ const sass = require('gulp-sass');
 const autoprefixer = require('gulp-autoprefixer');
 const babel = require('gulp-babel');
 const concat = require('gulp-concat');
-const gzip = require('gulp-gzip');
 const connect = require('gulp-connect');
 const del = require('del')
 const errorHandler = (err) => {
@@ -16,7 +15,7 @@ const paths = {
         dest: './build/css'
     },
     scripts: {
-        src: ['./js/main.js', './js/restaurant_info.js', './js/dbhelper.js', './js/helper.js', './index.js', './sw.js', './js/**/*.js'],
+        src: ['./js/main.js', './js/restaurant_info.js', './js/dbhelper.js', './js/**/*.js'],
         dest: './build/js'
     },
     html: {
@@ -26,6 +25,10 @@ const paths = {
     imgs: {
         src: './img/**/*.jpg',
         dest: './build/img'
+    },
+    serviceWorker: {
+        src: './sw.js',
+        dest: './build'
     }
 }
 
@@ -33,7 +36,7 @@ const paths = {
  * Clear the build directory to ensure that no extra files are left there.
  */
 gulp.task('clean', () => {
-    return del(['./build/**/*'])
+    return del(['./build/**/*', '!./data/**/*'])
         .then((paths) => {
             console.log(`🔫 Deleted files and folders:\n${paths.join('\n')}`);
         })
@@ -67,13 +70,17 @@ gulp.task('scripts', () => {
             compact: true,
             presets: ['env']
         }).on('error', error => errorHandler(error)))
-        // 3. concantanate them
-        .pipe(concat('index.js').on('error', error => errorHandler(error)))
-        // 4. gzip them
-        // .pipe(gzip().on('error', error => errorHandler(error)))
-        // 5. done.
+        // 3. done.
         .pipe(gulp.dest(paths.scripts.dest).on('error', error => errorHandler(error)))
 });
+
+/**
+ * Copy over the service worker.
+ */
+gulp.task('serviceWorker', () => (
+    gulp.src(paths.serviceWorker.src)
+        .pipe(gulp.dest(paths.serviceWorker.dest))
+));
 
 /**
  * Build the html files for production
@@ -127,4 +134,4 @@ gulp.task('server', (done) => {
 /**
  * Run it all!
  */
-gulp.task('default', gulp.series('clean', 'styles', 'scripts', 'htmls', 'images', 'watch', 'server'));
+gulp.task('default', gulp.series('clean', 'styles', 'scripts', 'serviceWorker', 'htmls', 'images', 'watch', 'server'));
