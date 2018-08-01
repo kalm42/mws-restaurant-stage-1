@@ -4,28 +4,30 @@ let restaurants,
 var newMap
 var markers = []
 
-// /**
-//  * Register the service worker
-//  */
-// if ('serviceWorker' in navigator) {
-//   navigator.serviceWorker.register('/sw.js')
-//     .then((worker) => {
-//       if (worker.installing) {
-//         console.log('Service worker installing.', worker);
-//         return;
-//       } else if (worker.waiting) {
-//         console.log('Service worker is waiting.', worker);
-//         return;
-//       } else if (worker.active) {
-//         console.log('Service worker is active.', worker);
-//         return;
-//       }
-//       return;
-//     })
-//     .catch((err) => {
-//       console.log(`Service worker failed with ${error}.`);
-//     })
-// }
+/**
+ * Register the service worker
+ */
+if (navigator.serviceWorker) {
+  console.log('👷‍♂️ Starting Service Worker');
+
+  navigator.serviceWorker.register('/sw.js')
+    .then((worker) => {
+      if (worker.installing) {
+        console.log('⚙️ Service worker installing.', worker);
+        return;
+      } else if (worker.waiting) {
+        console.log('⚙️ Service worker is waiting.', worker);
+        return;
+      } else if (worker.active) {
+        console.log('⚙️ Service worker is active.', worker);
+        return;
+      }
+      return;
+    })
+    .catch((err) => {
+      console.log(`Service worker failed with ${err}.`);
+    })
+}
 
 /**
  * Initalize IndexedDB

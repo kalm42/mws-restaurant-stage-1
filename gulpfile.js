@@ -108,6 +108,7 @@ gulp.task('images', () => {
 gulp.task('watch', (done) => {
     // Javascript
     gulp.watch(paths.scripts.src, gulp.series('scripts'));
+    gulp.watch(paths.serviceWorker.src, gulp.series('serviceWorker'));
     // CSS
     gulp.watch(paths.styles.src, gulp.series('styles'));
     // html
