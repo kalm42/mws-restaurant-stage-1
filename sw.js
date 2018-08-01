@@ -1,7 +1,7 @@
-const staticCacheName = 'mws-rs-v1'
+const staticCacheName = 'mws-rs-v2'
 
 self.addEventListener('install', event => {
-  console.log('V1 installing…');
+  console.log(`${staticCacheName} installing…`);
   event.waitUntil(
     caches.open(staticCacheName)
       .then(cache => (
