@@ -8,8 +8,8 @@ class DBHelper {
    * Change this to restaurants.json file location on your server.
    */
   static get DATABASE_URL() {
-    const port = 8000 // Change this to your server port
-    return `http://localhost:${port}/data/restaurants.json`;
+    const port = 1337 // Change this to your server port
+    return `http://localhost:${port}/restaurants`;
   }
 
   /**
@@ -24,8 +24,9 @@ class DBHelper {
         throw new Error(`Nework response was ${res.status}`);
       })
       .then((json) => {
-        if (json.hasOwnProperty('restaurants')) {
-          callback(null, json.restaurants);
+
+        if (json.length > 0) {
+          callback(null, json);
         }
         throw new Error('Database response did not include any restaurants.');
       })
@@ -39,18 +40,21 @@ class DBHelper {
    */
   static fetchRestaurantById(id, callback) {
     // fetch all restaurants with proper error handling.
-    DBHelper.fetchRestaurants((error, restaurants) => {
-      if (error) {
-        callback(error, null);
-      } else {
-        const restaurant = restaurants.find(r => r.id == id);
-        if (restaurant) { // Got the restaurant
-          callback(null, restaurant);
-        } else { // Restaurant does not exist in the database
-          callback('Restaurant does not exist', null);
+    fetch(`${DBHelper.DATABASE_URL}/${id}`)
+      .then((res) => {
+        if (res && res.ok) {
+          return res.json();
         }
-      }
-    });
+      })
+      .then((json) => {
+        if (json.hasOwnProperty('neighborhood')) {
+          callback(null, json);
+        }
+        throw new Error('Database response did not include any restaurants.');
+      })
+      .catch((err) => {
+        throw new Error(err);
+      });
   }
 
   /**
@@ -153,12 +157,12 @@ class DBHelper {
    * Restaurant image URL.
    */
   static imageUrlForRestaurant(restaurant) {
-    return (`/img/${restaurant.photograph}`);
+    return (`/img/${restaurant.photograph}.jpg`);
   }
 
   /**
    * Map marker for a restaurant.
-   */ 
+   */
   static mapMarkerForRestaurant(restaurant, map) {
     const marker = new google.maps.Marker({
       position: restaurant.latlng,

@@ -23,11 +23,11 @@ const paths = {
         dest: './build'
     },
     imgs: {
-        src: './img/**/*.jpg',
+        src: ['./img/**/*.jpg', './img/**/*.png'],
         dest: './build/img'
     },
     serviceWorker: {
-        src: './sw.js',
+        src: ['./sw.js', './manifest.json'],
         dest: './build'
     }
 }
