@@ -6,7 +6,7 @@ const concat = require('gulp-concat');
 const connect = require('gulp-connect');
 const del = require('del')
 const errorHandler = (err) => {
-    console.log(`Oh 💩! ${err.message}`);
+    console.log(`Oh 💩 ! ${err.message}`);
 };
 
 const paths = {
@@ -15,7 +15,7 @@ const paths = {
         dest: './build/css'
     },
     scripts: {
-        src: ['./js/main.js', './js/restaurant_info.js', './js/dbhelper.js', './js/**/*.js'],
+        src: ['./js/main.js', './js/restaurant_info.js', './js/dbhelper.js', './js/index.js', './js/**/*.js'],
         dest: './build/js'
     },
     html: {

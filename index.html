@@ -21,7 +21,7 @@
   </header>
 
   <main id="maincontent">
-    <section id="map-container" role="application">
+    <section id="map-container" aria-label="location" role="application">
       <div id="map"></div>
     </section>
     <section class="restaurants-container">
@@ -44,8 +44,9 @@
 
   <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDlSHRpDgpbJRxeDKEmfwpiOCf30KeT52k&libraries=places&callback=initMap"></script>
   <script charset="utf-8" src="js/dbhelper.js"></script>
+  <script charset="utf-8" src="js/index.js"></script>
   <script charset="utf-8" src="js/main.js"></script>
-
+  
   <footer id="footer">
     Copyright (c) 2017
     <a href="/">

@@ -4,8 +4,7 @@ module.exports = {
         "prettier",
     ],
     "env": {
-        "browser": true,
-        "node": true,
+        "browser": true
     },
     "plugins": [
         "prettier"
