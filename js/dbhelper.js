@@ -1,4 +1,3 @@
-const idb = require('idb');
 /**
  * Common database helper functions.
  */
@@ -14,25 +13,88 @@ class DBHelper {
   }
 
   /**
+   * 
+   */
+  static get DATABASE_NAME() {
+    return 'restaurant_reviews';
+  }
+
+  static get OBJECT_STORE() {
+    return 'restaurants'
+  }
+
+  static get IDB_VERSION() {
+    return 1;
+  }
+
+  /**
+   * Store restaurants in IndexedDB
+   */
+  static setRestaurants(data) {
+    // Put the restaurants into the indexedDB
+    const req = window.indexedDB.open(DBHelper.DATABASE_NAME, DBHelper.IDB_VERSION)
+
+    req.onupgradeneeded = function (event) {
+      const db = event.target.result;
+      console.log("database: ", db);
+
+      const objectStore = db.createObjectStore("restaurants", { keyPath: 'id' })
+
+      objectStore.transaction.oncomplete = function (event) {
+        const restaurantObjectStore = db.transaction("restaurants", "readwrite").objectStore("restaurants");
+        data.map((restaurant) => {
+          restaurantObjectStore.add(restaurant)
+        })
+      }
+    }
+  }
+
+  /**
+   * Retrieve restaurants from indexedDB
+   */
+  static getRestaurants() {
+    console.log("Attempting to fetch from indexedDB.");
+    let result;
+    const req = window.indexedDB.open(DBHelper.DATABASE_NAME, DBHelper.IDB_VERSION)
+    req.transaction("restaurants").objectStore("restaurants").getAll().onsuccess = function (event) {
+      console.log("😲", event.target.result);
+      result = event.target.result;
+    }
+    return result;
+  }
+
+  /**
    * Fetch all restaurants.
    */
   static fetchRestaurants(callback) {
+    let db;
+
     fetch(DBHelper.DATABASE_URL)
       .then((res) => {
+        console.log("Response: ", res);
+
         if (res.ok) {
           return res.json();
         }
-        throw new Error(`Nework response was ${res.status}`);
+        // throw new Error(`Nework response was ${res.status}`);
       })
       .then((json) => {
-
         if (json.length > 0) {
+          // Take the restaurants and add them to indexedDB.
+          DBHelper.setRestaurants(json);
           callback(null, json);
         }
-        throw new Error('Database response did not include any restaurants.');
+        // throw new Error('Database response did not include any restaurants.');
       })
       .catch((err) => {
-        throw new Error(err);
+        const req = window.indexedDB.open(DBHelper.DATABASE_NAME, DBHelper.IDB_VERSION)
+        const res = req.onsuccess = function () {
+          db = req.result;
+          db.transaction("restaurants").objectStore("restaurants").getAll().onsuccess = function (event) {
+            callback(null, event.target.result);
+            // throw new Error(err);
+          }
+        }
       })
   }
 
@@ -40,6 +102,7 @@ class DBHelper {
    * Fetch a restaurant by its ID.
    */
   static fetchRestaurantById(id, callback) {
+    let db;
     // fetch all restaurants with proper error handling.
     fetch(`${DBHelper.DATABASE_URL}/${id}`)
       .then((res) => {
@@ -54,7 +117,15 @@ class DBHelper {
         throw new Error('Database response did not include any restaurants.');
       })
       .catch((err) => {
-        throw new Error(err);
+        const req = window.indexedDB.open(DBHelper.DATABASE_NAME, DBHelper.IDB_VERSION)
+        const res = req.onsuccess = function () {
+          db = req.result;
+          db.transaction("restaurants").objectStore("restaurants").getAll().onsuccess = function (event) {
+            callback(null, event.target.result[id]);
+            // throw new Error(err);
+          }
+        }
+        // throw new Error(err);
       });
   }
 

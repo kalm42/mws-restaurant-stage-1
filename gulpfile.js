@@ -4,7 +4,7 @@ const autoprefixer = require('gulp-autoprefixer');
 const babel = require('gulp-babel');
 const concat = require('gulp-concat');
 const connect = require('gulp-connect');
-const del = require('del')
+const del = require('del');
 const errorHandler = (err) => {
     console.log(`Oh 💩 ! ${err.message}`);
 };
@@ -15,7 +15,7 @@ const paths = {
         dest: './build/css'
     },
     scripts: {
-        src: ['./js/main.js', './js/restaurant_info.js', './js/dbhelper.js', './js/index.js', './js/**/*.js'],
+        src: ['./js/main.js', './js/restaurant_info.js', './js/dbhelper.js', './js/**/*.js'],
         dest: './build/js'
     },
     html: {
@@ -70,7 +70,8 @@ gulp.task('scripts', () => {
             compact: true,
             presets: ['env']
         }).on('error', error => errorHandler(error)))
-        // 3. done.
+        // 3. run them through browserify for idb support
+        // 4. done.
         .pipe(gulp.dest(paths.scripts.dest).on('error', error => errorHandler(error)))
 });
 
