@@ -10,6 +10,7 @@ const babelify = require("babelify");
 const source = require("vinyl-source-stream");
 const glob = require("glob");
 const es = require("event-stream");
+const imagemin = require("gulp-imagemin");
 
 const errorHandler = err => {
   console.log(`Oh 💩 ! ${err.message}`);
@@ -131,7 +132,10 @@ gulp.task("manifest", () => {
  */
 gulp.task("images", () => {
   // No node image compressors looked decent so just copy the files.
-  return gulp.src(paths.imgs.src).pipe(gulp.dest(paths.imgs.dest));
+  return gulp
+    .src(paths.imgs.src)
+    .pipe(imagemin())
+    .pipe(gulp.dest(paths.imgs.dest));
 });
 
 /**
