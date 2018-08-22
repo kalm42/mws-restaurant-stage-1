@@ -1,139 +1,218 @@
-const gulp = require('gulp');
-const sass = require('gulp-sass');
-const autoprefixer = require('gulp-autoprefixer');
-const babel = require('gulp-babel');
-const concat = require('gulp-concat');
-const connect = require('gulp-connect');
-const del = require('del');
-const errorHandler = (err) => {
-    console.log(`Oh 💩 ! ${err.message}`);
+const gulp = require("gulp");
+const sass = require("gulp-sass");
+const autoprefixer = require("gulp-autoprefixer");
+const babel = require("gulp-babel");
+const concat = require("gulp-concat");
+const connect = require("gulp-connect");
+const del = require("del");
+const browserify = require("browserify");
+const babelify = require("babelify");
+const source = require("vinyl-source-stream");
+const glob = require("glob");
+const es = require("event-stream")
+
+const errorHandler = err => {
+  console.log(`Oh 💩 ! ${err.message}`);
 };
 
 const paths = {
-    styles: {
-        src: './css/**/*.scss',
-        dest: './build/css'
-    },
-    scripts: {
-        src: ['./js/main.js', './js/restaurant_info.js', './js/dbhelper.js', './js/**/*.js'],
-        dest: './build/js'
-    },
-    html: {
-        src: ['./index.html', './restaurant.html'],
-        dest: './build'
-    },
-    imgs: {
-        src: ['./img/**/*.jpg', './img/**/*.png'],
-        dest: './build/img'
-    },
-    serviceWorker: {
-        src: ['./sw.js', './manifest.json'],
-        dest: './build'
-    }
-}
+  styles: {
+    src: "./css/**/*.scss",
+    dest: "./build/css"
+  },
+  scripts: {
+    src: ["./js/main.js", "./js/restaurant_info.js", "./js/swregistrar.js"],
+    dest: "./build/js"
+  },
+  html: {
+    src: ["./index.html", "./restaurant.html"],
+    dest: "./build"
+  },
+  imgs: {
+    src: ["./img/**/*.jpg", "./img/**/*.png"],
+    dest: "./build/img"
+  },
+  serviceWorker: {
+    src: ["./sw.js"],
+    dest: "./build"
+  },
+  dbhelper: {
+    src: ["./js/dbhelper.js"],
+    dest: "./build/js"
+  },
+  manifest: {
+    src: ["./manifest.json"],
+    dest: "./build"
+  }
+};
 
 /**
  * Clear the build directory to ensure that no extra files are left there.
  */
-gulp.task('clean', () => {
-    return del(['./build/**/*', '!./data/**/*'])
-        .then((paths) => {
-            console.log(`🔫 Deleted files and folders:\n${paths.join('\n')}`);
-        })
+gulp.task("clean", () => {
+  return del(["./build/**/*", "!./data/**/*"]).then(paths => {
+    console.log(`🔫 Deleted files and folders:\n${paths.join("\n")}`);
+  });
 });
 
 /**
  * Styles instructions for production
  */
-gulp.task('styles', () => {
-    console.log('🏗️ Building styles;');
+gulp.task("styles", () => {
+  console.log("🏗️ Building styles;");
 
-    return gulp.src(paths.styles.src)
-        .pipe(sass().on('error', error => errorHandler(error)))
-        .pipe(autoprefixer({
-            browsers: ['last 2 versions']
-        }).on('error', error => errorHandler(error)))
-        .pipe(concat('styles.css').on('error', error => errorHandler(error)))
-        // .pipe(gzip().on('error', error => errorHandler(error)))
-        .pipe(gulp.dest(paths.styles.dest).on('error', error => errorHandler(error)));
+  return (
+    gulp
+      .src(paths.styles.src)
+      .pipe(sass().on("error", error => errorHandler(error)))
+      .pipe(
+        autoprefixer({
+          browsers: ["last 2 versions"]
+        }).on("error", error => errorHandler(error))
+      )
+      .pipe(concat("styles.css").on("error", error => errorHandler(error)))
+      // .pipe(gzip().on('error', error => errorHandler(error)))
+      .pipe(
+        gulp.dest(paths.styles.dest).on("error", error => errorHandler(error))
+      )
+  );
 });
 
 /**
  * Prepare the javascript files for production
  */
-gulp.task('scripts', () => {
-    console.log('🏗️ Building scripts;');
-    // 1. Get a glob of the files.
-    return gulp.src(paths.scripts.src)
-        // 2. Babel them to vanilla js.
-        .pipe(babel({
-            compact: true,
-            presets: ['env']
-        }).on('error', error => errorHandler(error)))
-        // 3. run them through browserify for idb support
-        // 4. done.
-        .pipe(gulp.dest(paths.scripts.dest).on('error', error => errorHandler(error)))
+gulp.task("scripts", () => {
+  return (
+    gulp
+      // get blob of files
+      .src(paths.scripts.src)
+      // run them through babel
+      .pipe(
+        babel({
+          compact: true,
+          presets: ["@babel/preset-env"]
+        }).on("error", error => errorHandler(error))
+      )
+      // spit them out
+      .pipe(
+        gulp.dest(paths.scripts.dest).on("error", error => errorHandler(error))
+      )
+  );
 });
 
 /**
- * Copy over the service worker.
+ * Process the service worker.
  */
-gulp.task('serviceWorker', () => (
-    gulp.src(paths.serviceWorker.src)
-        .pipe(gulp.dest(paths.serviceWorker.dest))
-));
+gulp.task("serviceWorker", () => {
+  // Bundle required files for browser rendering.
+  const b = browserify();
+
+  return (
+    b
+      // Run the service worker js through babel
+      .transform("babelify", { presets: ["@babel/preset-env"] })
+      // Pull in the service worker file
+      .require(paths.serviceWorker.src)
+      // bundle the require'd files.
+      .bundle()
+      // make everything a stream again for gulp.
+      .pipe(source("sw.js"))
+      // spit out the file
+      .pipe(gulp.dest(paths.serviceWorker.dest))
+  );
+});
+
+/**
+ * Process the database helper
+ */
+gulp.task("dbhelper", () => {
+  const b = browserify();
+
+  return (
+    b
+      // Run the javascript through babel
+      .transform("babelify", { presets: ["@babel/preset-env"] })
+      // pull in database helper
+      .require(paths.dbhelper.src)
+      // bundle all the require'd files
+      .bundle()
+      // make everything a stream for gulp
+      .pipe(source("dbhelper.js"))
+      // spit out the file
+      .pipe(gulp.dest(paths.dbhelper.dest))
+  );
+});
 
 /**
  * Build the html files for production
  */
-gulp.task('htmls', () => {
-    console.log('🏗️ Building html;');
-    // Move the html files to the build directory
-    return gulp.src(paths.html.src)
-        .pipe(gulp.dest(paths.html.dest))
+gulp.task("htmls", () => {
+  // Move the html files to the build directory
+  return gulp.src(paths.html.src).pipe(gulp.dest(paths.html.dest));
+});
+
+/**
+ * Build the manifest file for production
+ */
+gulp.task("manifest", () => {
+  // Move the manifest file into production.
+  return gulp.src(paths.manifest.src).pipe(gulp.dest(paths.manifest.dest));
 });
 
 /**
  * Build the images for production
  */
-gulp.task('images', () => {
-    console.log('🏗️ Building images;');
-    // No node image compressors looked decent so just copy the files.
-    return gulp.src(paths.imgs.src)
-        .pipe(gulp.dest(paths.imgs.dest));
+gulp.task("images", () => {
+  // No node image compressors looked decent so just copy the files.
+  return gulp.src(paths.imgs.src).pipe(gulp.dest(paths.imgs.dest));
 });
 
 /**
  * Task to start watching all the files for hot reloading
  */
-gulp.task('watch', (done) => {
-    // Javascript
-    gulp.watch(paths.scripts.src, gulp.series('scripts'));
-    gulp.watch(paths.serviceWorker.src, gulp.series('serviceWorker'));
-    // CSS
-    gulp.watch(paths.styles.src, gulp.series('styles'));
-    // html
-    gulp.watch(paths.html.src, gulp.series('htmls'));
-    done();
+gulp.task("watch", done => {
+  // Javascript
+  gulp.watch(paths.scripts.src, gulp.series("scripts"));
+  gulp.watch(paths.serviceWorker.src, gulp.series("serviceWorker"));
+  gulp.watch(paths.dbhelper.src, gulp.series("dbhelper"));
+  // CSS
+  gulp.watch(paths.styles.src, gulp.series("styles"));
+  // html
+  gulp.watch(paths.html.src, gulp.series("htmls"));
+  done();
 });
 
 /**
  * Server for the files.
  */
-gulp.task('server', (done) => {
-    const port = 8000
-    console.log(`🖥️ Starting server on port ${port}. http://localhost:${port}`);
+gulp.task("server", done => {
+  const port = 8000;
+  console.log(`🖥️ Starting server on port ${port}. http://localhost:${port}`);
 
-    connect.server({
-        // Server configuration
-        root: './build',
-        livereload: true,
-        port: port
-    });
-    done();
+  connect.server({
+    // Server configuration
+    root: "./build",
+    livereload: true,
+    port: port
+  });
+  done();
 });
 
 /**
  * Run it all!
  */
-gulp.task('default', gulp.series('clean', 'styles', 'scripts', 'serviceWorker', 'htmls', 'images', 'watch', 'server'));
+gulp.task(
+  "default",
+  gulp.series(
+    "clean",
+    "styles",
+    "scripts",
+    "serviceWorker",
+    "dbhelper",
+    "htmls",
+    "manifest",
+    "images",
+    "watch",
+    "server"
+  )
+);
