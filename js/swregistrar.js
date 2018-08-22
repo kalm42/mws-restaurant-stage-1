@@ -5,7 +5,7 @@ if (navigator.serviceWorker) {
   console.log("👷‍♂️ Starting Service Worker");
 
   navigator.serviceWorker
-    .register("/sw.js")
+    .register("/sw.js", { scope: "/" })
     .then(worker => {
       if (worker.installing) {
         console.log("⚙️ Service worker installing.", worker);

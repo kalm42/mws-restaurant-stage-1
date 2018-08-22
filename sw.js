@@ -1,4 +1,4 @@
-const staticCacheName = "mws-rs-v3";
+const staticCacheName = "mws-rs-v10";
 
 self.addEventListener("install", e => {
   console.log(`🔨 ${staticCacheName} installing…`);
@@ -31,19 +31,19 @@ self.addEventListener("install", e => {
   );
 });
 
-self.addEventListener("activate", e => {
-  e.waitUntil(
-    caches
-      .keys()
-      .then(cacheNames =>
-        Promise.all(
-          cacheNames
-            .filter(cacheName => cacheName !== staticCacheName)
-            .map(cacheName => caches.delete(cacheName))
-        )
-      )
-  );
-});
+// self.addEventListener("activate", e => {
+//   e.waitUntil(
+//     caches
+//       .keys()
+//       .then(cacheNames =>
+//         Promise.all(
+//           cacheNames
+//             .filter(cacheName => cacheName !== staticCacheName)
+//             .map(cacheName => caches.delete(cacheName))
+//         )
+//       )
+//   );
+// });
 
 self.addEventListener("fetch", event => {
   event.respondWith(

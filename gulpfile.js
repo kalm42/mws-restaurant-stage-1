@@ -9,7 +9,7 @@ const browserify = require("browserify");
 const babelify = require("babelify");
 const source = require("vinyl-source-stream");
 const glob = require("glob");
-const es = require("event-stream")
+const es = require("event-stream");
 
 const errorHandler = err => {
   console.log(`Oh 💩 ! ${err.message}`);
@@ -80,24 +80,24 @@ gulp.task("styles", () => {
 
 /**
  * Prepare the javascript files for production
+ * Inspired, heavily, from https://fettblog.eu/gulp-browserify-multiple-bundles/
  */
-gulp.task("scripts", () => {
-  return (
-    gulp
-      // get blob of files
-      .src(paths.scripts.src)
-      // run them through babel
-      .pipe(
-        babel({
-          compact: true,
-          presets: ["@babel/preset-env"]
-        }).on("error", error => errorHandler(error))
-      )
-      // spit them out
-      .pipe(
-        gulp.dest(paths.scripts.dest).on("error", error => errorHandler(error))
-      )
-  );
+gulp.task("scripts", done => {
+  glob("./js/*.js", (err, files) => {
+    if (err) {
+      done(err);
+    }
+
+    const tasks = files.map(file => {
+      return browserify({ entries: [file] })
+        .transform("babelify", { presets: ["@babel/preset-env"] })
+        .require(file)
+        .bundle()
+        .pipe(source(file))
+        .pipe(gulp.dest("./build"));
+    });
+    es.merge(tasks).on("end", done);
+  });
 });
 
 /**
@@ -119,27 +119,6 @@ gulp.task("serviceWorker", () => {
       .pipe(source("sw.js"))
       // spit out the file
       .pipe(gulp.dest(paths.serviceWorker.dest))
-  );
-});
-
-/**
- * Process the database helper
- */
-gulp.task("dbhelper", () => {
-  const b = browserify();
-
-  return (
-    b
-      // Run the javascript through babel
-      .transform("babelify", { presets: ["@babel/preset-env"] })
-      // pull in database helper
-      .require(paths.dbhelper.src)
-      // bundle all the require'd files
-      .bundle()
-      // make everything a stream for gulp
-      .pipe(source("dbhelper.js"))
-      // spit out the file
-      .pipe(gulp.dest(paths.dbhelper.dest))
   );
 });
 
@@ -174,7 +153,6 @@ gulp.task("watch", done => {
   // Javascript
   gulp.watch(paths.scripts.src, gulp.series("scripts"));
   gulp.watch(paths.serviceWorker.src, gulp.series("serviceWorker"));
-  gulp.watch(paths.dbhelper.src, gulp.series("dbhelper"));
   // CSS
   gulp.watch(paths.styles.src, gulp.series("styles"));
   // html
@@ -208,7 +186,6 @@ gulp.task(
     "styles",
     "scripts",
     "serviceWorker",
-    "dbhelper",
     "htmls",
     "manifest",
     "images",

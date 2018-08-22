@@ -1,6 +1,9 @@
-// let restaurants, neighborhoods, cuisines;
-// var newMap;
-// var markers = [];
+import DBHelper from "./dbhelper";
+
+// Next two lines take from ->
+// https://github.com/thebigtoona/mws-restaurant-stage-1/blob/master/app/scripts/main.js
+window["map"];
+window["markers"] = [];
 
 /**
  * Fetch neighborhoods and cuisines as soon as the page is loaded.
@@ -108,6 +111,10 @@ const updateRestaurants = () => {
   const cuisine = cSelect[cIndex].value;
   const neighborhood = nSelect[nIndex].value;
 
+  if (!DBHelper) {
+    return;
+  }
+
   DBHelper.fetchRestaurantByCuisineAndNeighborhood(
     cuisine,
     neighborhood,
@@ -155,6 +162,9 @@ const fillRestaurantsHTML = (restaurants = self.restaurants) => {
  * Create restaurant HTML.
  */
 const createRestaurantHTML = restaurant => {
+  if (!DBHelper) {
+    return;
+  }
   const li = document.createElement("li");
 
   const image = document.createElement("img");
@@ -188,6 +198,9 @@ const createRestaurantHTML = restaurant => {
  * Add markers for current restaurants to the map.
  */
 const addMarkersToMap = (restaurants = self.restaurants) => {
+  if (!DBHelper) {
+    return;
+  }
   restaurants.forEach(restaurant => {
     // Add marker to the map
     const marker = DBHelper.mapMarkerForRestaurant(restaurant, self.map);
