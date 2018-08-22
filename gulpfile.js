@@ -105,21 +105,9 @@ gulp.task("scripts", done => {
  */
 gulp.task("serviceWorker", () => {
   // Bundle required files for browser rendering.
-  const b = browserify();
-
-  return (
-    b
-      // Run the service worker js through babel
-      .transform("babelify", { presets: ["@babel/preset-env"] })
-      // Pull in the service worker file
-      .require(paths.serviceWorker.src)
-      // bundle the require'd files.
-      .bundle()
-      // make everything a stream again for gulp.
-      .pipe(source("sw.js"))
-      // spit out the file
-      .pipe(gulp.dest(paths.serviceWorker.dest))
-  );
+  return gulp
+    .src(paths.serviceWorker.src)
+    .pipe(gulp.dest(paths.serviceWorker.dest));
 });
 
 /**

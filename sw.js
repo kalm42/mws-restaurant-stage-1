@@ -1,6 +1,8 @@
 const staticCacheName = "mws-rs-v10";
 
-self.addEventListener("install", e => {
+console.log("Who am I?", self);
+
+this.addEventListener("install", e => {
   console.log(`🔨 ${staticCacheName} installing…`);
   e.waitUntil(
     caches
@@ -10,9 +12,12 @@ self.addEventListener("install", e => {
           "/",
           "css/styles.css",
           "js/dbhelper.js",
+          "js/idbhelper.js",
           "js/main.js",
           "js/restaurant_info.js",
-          "js/idbhelper.js",
+          "js/swregistrar.js",
+          "index.html",
+          "restaurant.html",
           "img/1.jpg",
           "img/2.jpg",
           "img/3.jpg",
@@ -23,27 +28,25 @@ self.addEventListener("install", e => {
           "img/8.jpg",
           "img/9.jpg",
           "img/10.jpg",
-          "img/404.jpg",
-          "index.html",
-          "restaurant.html"
+          "img/404.jpg"
         ])
       )
   );
 });
 
-// self.addEventListener("activate", e => {
-//   e.waitUntil(
-//     caches
-//       .keys()
-//       .then(cacheNames =>
-//         Promise.all(
-//           cacheNames
-//             .filter(cacheName => cacheName !== staticCacheName)
-//             .map(cacheName => caches.delete(cacheName))
-//         )
-//       )
-//   );
-// });
+self.addEventListener("activate", e => {
+  e.waitUntil(
+    caches
+      .keys()
+      .then(cacheNames =>
+        Promise.all(
+          cacheNames
+            .filter(cacheName => cacheName !== staticCacheName)
+            .map(cacheName => caches.delete(cacheName))
+        )
+      )
+  );
+});
 
 self.addEventListener("fetch", event => {
   event.respondWith(
