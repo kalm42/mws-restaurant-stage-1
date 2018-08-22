@@ -11,6 +11,10 @@ const source = require("vinyl-source-stream");
 const glob = require("glob");
 const es = require("event-stream");
 const imagemin = require("gulp-imagemin");
+const htmlmin = require("gulp-htmlmin");
+const minify = require("gulp-minify");
+const uglify = require("gulp-uglify");
+const streamify = require("gulp-streamify");
 
 const errorHandler = err => {
   console.log(`Oh 💩 ! ${err.message}`);
@@ -60,23 +64,19 @@ gulp.task("clean", () => {
  * Styles instructions for production
  */
 gulp.task("styles", () => {
-  console.log("🏗️ Building styles;");
-
-  return (
-    gulp
-      .src(paths.styles.src)
-      .pipe(sass().on("error", error => errorHandler(error)))
-      .pipe(
-        autoprefixer({
-          browsers: ["last 2 versions"]
-        }).on("error", error => errorHandler(error))
-      )
-      .pipe(concat("styles.css").on("error", error => errorHandler(error)))
-      // .pipe(gzip().on('error', error => errorHandler(error)))
-      .pipe(
-        gulp.dest(paths.styles.dest).on("error", error => errorHandler(error))
-      )
-  );
+  return gulp
+    .src(paths.styles.src)
+    .pipe(sass().on("error", error => errorHandler(error)))
+    .pipe(
+      autoprefixer({
+        browsers: ["last 2 versions"]
+      }).on("error", error => errorHandler(error))
+    )
+    .pipe(concat("styles.css").on("error", error => errorHandler(error)))
+    .pipe(minify())
+    .pipe(
+      gulp.dest(paths.styles.dest).on("error", error => errorHandler(error))
+    );
 });
 
 /**
@@ -95,6 +95,7 @@ gulp.task("scripts", done => {
         .require(file)
         .bundle()
         .pipe(source(file))
+        .pipe(streamify(uglify()))
         .pipe(gulp.dest("./build"));
     });
     es.merge(tasks).on("end", done);
@@ -108,6 +109,7 @@ gulp.task("serviceWorker", () => {
   // Bundle required files for browser rendering.
   return gulp
     .src(paths.serviceWorker.src)
+    .pipe(minify())
     .pipe(gulp.dest(paths.serviceWorker.dest));
 });
 
@@ -116,7 +118,11 @@ gulp.task("serviceWorker", () => {
  */
 gulp.task("htmls", () => {
   // Move the html files to the build directory
-  return gulp.src(paths.html.src).pipe(gulp.dest(paths.html.dest));
+  return gulp
+    .src(paths.html.src)
+    .pipe(htmlmin({ collapseWhitespace: true }))
+    .pipe(minify())
+    .pipe(gulp.dest(paths.html.dest));
 });
 
 /**

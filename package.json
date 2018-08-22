@@ -38,9 +38,13 @@
     "gulp-babel": "8.0.0-beta.2",
     "gulp-concat": "^2.6.1",
     "gulp-connect": "^5.5.0",
+    "gulp-htmlmin": "^4.0.0",
     "gulp-imagemin": "^4.1.0",
+    "gulp-minify": "^3.1.0",
     "gulp-rename": "^1.4.0",
     "gulp-sass": "^4.0.1",
+    "gulp-streamify": "^1.0.2",
+    "gulp-uglify": "^3.0.1",
     "vinyl-source-stream": "^2.0.0"
   },
   "dependencies": {
