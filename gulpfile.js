@@ -159,22 +159,6 @@ gulp.task("watch", done => {
 });
 
 /**
- * Server for the files.
- */
-gulp.task("server", done => {
-  const port = 8000;
-  console.log(`🖥️ Starting server on port ${port}. http://localhost:${port}`);
-
-  connect.server({
-    // Server configuration
-    root: "./build",
-    livereload: true,
-    port: port
-  });
-  done();
-});
-
-/**
  * Run it all!
  */
 gulp.task(
@@ -187,7 +171,6 @@ gulp.task(
     "htmls",
     "manifest",
     "images",
-    "watch",
-    "server"
+    "watch"
   )
 );

@@ -6,6 +6,29 @@ window["map"];
 window["markers"] = [];
 
 /**
+ * Lazy loading of restaurant images
+ * concept from https://www.smashingmagazine.com/2018/01/deferring-lazy-loading-intersection-observer-api/
+ */
+const lazyload = image => {
+  const src = image.getAttribute("data-src");
+  if (!src) {
+    return;
+  }
+  image.src = src;
+};
+const io = new IntersectionObserver(entries => {
+  console.log(entries);
+  entries.map(entry => {
+    if (entry.isIntersecting) {
+      // handle loading of element.
+      lazyload(entry.target);
+      // Stop tracking element.
+      io.unobserve(entry.target);
+    }
+  });
+});
+
+/**
  * Fetch neighborhoods and cuisines as soon as the page is loaded.
  */
 document.addEventListener("DOMContentLoaded", event => {
@@ -171,8 +194,8 @@ const createRestaurantHTML = restaurant => {
   const image = document.createElement("img");
   image.className = "restaurant-img";
   image.alt = `A photo of ${restaurant.name}`;
-  image.src = DBHelper.imageUrlForRestaurant(restaurant);
-  // image.alt = ``;
+  image.setAttribute("data-src", DBHelper.imageUrlForRestaurant(restaurant));
+  io.observe(image);
   li.append(image);
 
   const name = document.createElement("h1");

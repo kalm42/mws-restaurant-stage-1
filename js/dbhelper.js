@@ -69,6 +69,8 @@ class DBHelper {
    */
   static goGet(url = "", errorMessage = "Error: ") {
     if (url.length < 7) return;
+    console.log(`GET ${url}`);
+
     return fetch(url)
       .then(res => {
         if (!res.ok || res.status > 300) {
@@ -155,7 +157,7 @@ class DBHelper {
    * Get all of the available restaurants from the server.
    */
   static getAllRestaurants() {
-    return this.goGet(
+    return DBHelper.goGet(
       DBHelper.RESTAURANT_DB_URL,
       "❗💩 Error fetching all restaurants: "
     );
@@ -165,7 +167,7 @@ class DBHelper {
    * Get all of the user's favorited restaurants.
    */
   static getFavoriteRestaurants() {
-    return this.goGet(
+    return DBHelper.goGet(
       `${DBHelper.RESTAURANT_DB_URL}/?is_favorite=true`,
       "❗💩 Error fetching favorite restaurants: "
     );
@@ -176,9 +178,9 @@ class DBHelper {
    * @param {number} id
    */
   static getRestaurantById(id) {
-    if (!Number.isInteger(id)) return;
-    return this.goGet(
-      `${this.RESTAURANT_DB_URL}/${id}`,
+    if (!Number.isInteger(Number(id))) return;
+    return DBHelper.goGet(
+      `${DBHelper.RESTAURANT_DB_URL}/${id}`,
       "❗💩 Error fetching restaurant by id: "
     );
   }
@@ -188,9 +190,9 @@ class DBHelper {
    * @param {number} id
    */
   static getReviewsByRestaurant(id) {
-    if (!Number.isInteger(id)) return;
-    return this.goGet(
-      `${this.REVIEW_DB_URL}/?restaurant_id=${id}`,
+    if (!Number.isInteger(Number(id))) return;
+    return DBHelper.goGet(
+      `${DBHelper.REVIEW_DB_URL}/?restaurant_id=${id}`,
       "❗💩 Error fetching reviews for restaurant: "
     );
   }
@@ -199,7 +201,10 @@ class DBHelper {
    * Fetch all reviews from the server
    */
   static getAllReviews() {
-    return this.goGet(this.REVIEW_DB_URL, "❗💩 Error fetching all reviews.");
+    return DBHelper.goGet(
+      DBHelper.REVIEW_DB_URL,
+      "❗💩 Error fetching all reviews."
+    );
   }
 
   /**
@@ -207,9 +212,9 @@ class DBHelper {
    * @param {number} id
    */
   static getReviewById(id) {
-    if (!Number.isInteger(id)) return;
-    return this.goGet(
-      `${this.REVIEW_DB_URL}/${id}`,
+    if (!Number.isInteger(Number(id))) return;
+    return DBHelper.goGet(
+      `${DBHelper.REVIEW_DB_URL}/${id}`,
       "❗💩 Error fetching review: "
     );
   }
@@ -219,17 +224,33 @@ class DBHelper {
    * @param {object} review
    */
   static setReview(review) {
-    if (!this.isValidReview(review)) return;
+    if (!DBHelper.isValidReview(review)) return;
 
     // Escape name and comments
     review.name = validator.escape(review.name);
     review.comments = validator.escape(review.comments);
 
-    return this.goPost(
-      this.REVIEW_DB_URL,
+    return DBHelper.goPost(
+      DBHelper.REVIEW_DB_URL,
       review,
       "❗💩 Error posting review: "
     );
+  }
+
+  /**
+   *
+   * @param {number} restaurant_id
+   * @param {error, array[object]} callback
+   */
+  static fetchReviewsByRestaurant(restaurant_id, callback) {
+    if (!Number.isInteger(Number(restaurant_id))) return;
+    DBHelper.getReviewsByRestaurant(restaurant_id)
+      .then(reviews => {
+        callback(null, reviews);
+      })
+      .catch(err => {
+        callback(err, null);
+      });
   }
 
   /**
@@ -237,8 +258,10 @@ class DBHelper {
    * @param {number} id
    */
   static setFavorite(id) {
-    if (!Number.isInteger(id)) return;
-    return this.goPut(`${this.RESTAURANT_DB_URL}/${id}/?is_favorite=true`);
+    if (!Number.isInteger(Number(id))) return;
+    return DBHelper.goPut(
+      `${DBHelper.RESTAURANT_DB_URL}/${id}/?is_favorite=true`
+    );
   }
 
   /**
@@ -246,8 +269,10 @@ class DBHelper {
    * @param {number} id
    */
   static unsetFavorite(id) {
-    if (!Number.isInteger(id)) return;
-    return this.goPut(`${this.RESTAURANT_DB_URL}/${id}/?is_favorite=false`);
+    if (!Number.isInteger(Number(id))) return;
+    return DBHelper.goPut(
+      `${DBHelper.RESTAURANT_DB_URL}/${id}/?is_favorite=false`
+    );
   }
 
   /**
@@ -256,14 +281,14 @@ class DBHelper {
    * @param {object} review
    */
   static setUpdatedReview(id, review) {
-    if (!Number.isInteger(id)) return;
-    if (!this.isValidReview(review)) return;
+    if (!Number.isInteger(Number(id))) return;
+    if (!DBHelper.isValidReview(review)) return;
 
     // Escape name and comments
     review.name = validator.escape(review.name);
     review.comments = validator.escape(review.comments);
 
-    return this.goPut(`${this.REVIEW_DB_URL}/${id}`, review);
+    return DBHelper.goPut(`${DBHelper.REVIEW_DB_URL}/${id}`, review);
   }
 
   /**
@@ -271,16 +296,16 @@ class DBHelper {
    * @param {number} id
    */
   static deleteReview(id) {
-    if (!Number.isInteger(id)) return;
+    if (!Number.isInteger(Number(id))) return;
 
-    return this.goDelete(`${this.REVIEW_DB_URL}/${id}`);
+    return DBHelper.goDelete(`${DBHelper.REVIEW_DB_URL}/${id}`);
   }
 
   /**
    * Fetch all restaurants.
    */
   static fetchRestaurants(callback) {
-    this.getAllRestaurants()
+    DBHelper.getAllRestaurants()
       .then(json => {
         callback(null, json);
       })
@@ -293,7 +318,7 @@ class DBHelper {
    * Fetch a restaurant by its ID.
    */
   static fetchRestaurantById(id, callback) {
-    this.getRestaurantById(id)
+    DBHelper.getRestaurantById(id)
       .then(json => {
         callback(null, json);
       })

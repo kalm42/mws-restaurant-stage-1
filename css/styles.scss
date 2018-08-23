@@ -4,37 +4,37 @@ body,
 td,
 th,
 p {
-	font-family: Arial, Helvetica, sans-serif;
-	font-size: 10pt;
-	color: #333;
-	line-height: 1.5;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 10pt;
+  color: #333;
+  line-height: 1.5;
 }
 
 body {
-	background-color: #fdfdfd;
-	margin: 0;
+  background-color: #fdfdfd;
+  margin: 0;
 }
 
 ul,
 li {
-	font-family: Arial, Helvetica, sans-serif;
-	font-size: 10pt;
-	color: #333;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 10pt;
+  color: #333;
 }
 
 a {
-	color: orange;
-	text-decoration: none;
+  color: orange;
+  text-decoration: none;
 }
 
 a:hover,
 a:focus {
-	color: #3397db;
-	text-decoration: none;
+  color: #3397db;
+  text-decoration: none;
 }
 
-a img{
-	border: none 0px #fff;
+a img {
+  border: none 0px #fff;
 }
 
 h1,
@@ -59,7 +59,7 @@ hgroup,
 menu,
 nav,
 section {
-	display: block;
+  display: block;
 }
 
 #maincontent {
@@ -84,7 +84,7 @@ nav {
   width: 100%;
   height: 80px;
   background-color: #252831;
-  text-align:center;
+  text-align: center;
 }
 
 nav h1 {
@@ -114,7 +114,7 @@ nav h1 a {
 }
 
 /* Add a slash symbol (/) before/behind each list item */
-#breadcrumb li+li:before {
+#breadcrumb li + li:before {
   padding: 8px;
   color: black;
   content: "/\00a0";
@@ -142,7 +142,7 @@ nav h1 a {
 /* ====================== Restaurant Filtering ====================== */
 .filter-options {
   width: 100%;
-  background-color: #3397DB;
+  background-color: #3397db;
   align-items: center;
   padding: calc(4vw) 0;
 }
@@ -158,7 +158,7 @@ nav h1 a {
 .filter-options select {
   background-color: white;
   border: 1px solid #fff;
-  font-family: Arial,sans-serif;
+  font-family: Arial, sans-serif;
   font-size: 11pt;
   height: 35px;
   letter-spacing: 0;
@@ -191,7 +191,7 @@ nav h1 a {
 #restaurants-list li {
   background-color: #fff;
   border: 2px solid #ccc;
-  font-family: Arial,sans-serif;
+  font-family: Arial, sans-serif;
   margin: 15px;
   min-height: 380px;
   padding: 0 30px 25px;
@@ -220,7 +220,7 @@ nav h1 a {
 
 #restaurants-list li h1 {
   color: #f18200;
-  font-family: Arial,sans-serif;
+  font-family: Arial, sans-serif;
   font-size: 14pt;
   font-weight: 200;
   letter-spacing: 0;
@@ -299,7 +299,7 @@ header {
 
 #restaurant-name {
   color: #f18200;
-  font-family: Arial,sans-serif;
+  font-family: Arial, sans-serif;
   font-size: calc(3vw + 10px);
   font-weight: 200;
   letter-spacing: 0;
@@ -309,7 +309,7 @@ header {
 }
 
 #restaurant-img {
-	width: 100%;
+  width: 100%;
   border-radius: 15px 0;
 }
 
@@ -328,10 +328,11 @@ header {
   padding: 2px 0;
   text-align: center;
   text-transform: uppercase;
-	width: 100%;
+  width: 100%;
 }
 
-#restaurant-container, #reviews-container {
+#restaurant-container,
+#reviews-container {
   border-bottom: 1px solid #d9d9d9;
   border-top: 1px solid #fff;
   padding: 10px 20px;
@@ -375,6 +376,23 @@ header {
     margin: 0;
   }
 }
+.button {
+  background-color: orange;
+  border-bottom: 3px solid #eee;
+  color: #fff;
+  display: inline-block;
+  font-size: 10pt;
+  padding: 8px 30px 10px;
+  text-align: center;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+.reviews-header {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  margin-bottom: 15px;
+}
 
 .reviews-list-header {
   background: #333;
@@ -416,7 +434,6 @@ header {
   list-style-type: none;
   margin: 0 0 30px;
   overflow: hidden;
-
 }
 
 #reviews-list li > p {
@@ -427,7 +444,6 @@ header {
 #restaurant-hours td {
   color: #666;
 }
-
 
 @media screen and (max-width: 400px) {
   background-color: red;
