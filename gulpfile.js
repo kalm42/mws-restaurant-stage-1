@@ -26,11 +26,16 @@ const paths = {
     dest: "./build/css"
   },
   scripts: {
-    src: ["./js/main.js", "./js/restaurant_info.js", "./js/swregistrar.js"],
+    src: [
+      "./js/main.js",
+      "./js/restaurant_info.js",
+      "./js/swregistrar.js",
+      "./js/**/*.js"
+    ],
     dest: "./build/js"
   },
   html: {
-    src: ["./index.html", "./restaurant.html"],
+    src: ["./*.html"],
     dest: "./build"
   },
   imgs: {
@@ -38,12 +43,8 @@ const paths = {
     dest: "./build/img"
   },
   serviceWorker: {
-    src: ["./sw.js"],
+    src: "./sw.js",
     dest: "./build"
-  },
-  dbhelper: {
-    src: ["./js/dbhelper.js"],
-    dest: "./build/js"
   },
   manifest: {
     src: ["./manifest.json"],
@@ -95,7 +96,7 @@ gulp.task("scripts", done => {
         .require(file)
         .bundle()
         .pipe(source(file))
-        .pipe(streamify(uglify()))
+        // .pipe(streamify(uglify()))
         .pipe(gulp.dest("./build"));
     });
     es.merge(tasks).on("end", done);
@@ -107,10 +108,19 @@ gulp.task("scripts", done => {
  */
 gulp.task("serviceWorker", () => {
   // Bundle required files for browser rendering.
-  return gulp
-    .src(paths.serviceWorker.src)
-    .pipe(minify())
-    .pipe(gulp.dest(paths.serviceWorker.dest));
+  return (
+    browserify({ entries: [paths.serviceWorker.src] })
+      .transform("babelify", { presets: ["@babel/preset-env"] })
+      .require(paths.serviceWorker.src)
+      .bundle()
+      .pipe(source(paths.serviceWorker.src))
+      // .pipe(streamify(uglify()))
+      .pipe(gulp.dest("./build"))
+  );
+  // return gulp
+  //   .src(paths.serviceWorker.src)
+  //   .pipe(minify())
+  //   .pipe(gulp.dest(paths.serviceWorker.dest));
 });
 
 /**

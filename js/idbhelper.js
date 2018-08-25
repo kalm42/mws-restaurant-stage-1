@@ -14,9 +14,11 @@ const UNRESOLVED = "unresolved";
  * Helper variable returning a promise for indexedDB.
  */
 const idbPromise = idb.open(IDB_NAME, 3, upgradeDB => {
-  switch (key) {
+  switch (upgradeDB.oldVersion) {
     case 0:
-      upgradeDB.createObjectStore(RESTAURANTS, { keyPath: "id" });
+      upgradeDB
+        .createObjectStore(RESTAURANTS, { keyPath: "id" })
+        .createIndex("is_favorite", "is_favorite");
     case 1:
       upgradeDB
         .createObjectStore(REVIEWS, { keyPath: "id" })
@@ -29,64 +31,101 @@ const idbPromise = idb.open(IDB_NAME, 3, upgradeDB => {
   }
 });
 
-/**
- * Returns a read only object store for reviews.
- */
-const reviewObjectStore = () =>
-  idbPromise.then(objStore =>
-    objStore.transaction(REVIEWS).objectStore(REVIEWS)
-  );
-
-/**
- * Returns a read/write object store for reviews.
- */
-const reviewObjectStoreWithReadWrite = async () =>
-  await idbPromise.then(objStore =>
-    objStore.transaction(REVIEWS, "readwrite").objectStore(REVIEWS)
-  );
-
-/**
+/*******************************************************************************
  * Reviews
  */
 
 /**
+ * Get review by id
+ */
+module.exports.getReview = id =>
+  idbPromise.then(objStore =>
+    objStore
+      .transaction(REVIEWS)
+      .objectStore(REVIEWS)
+      .get(id)
+  );
+/**
  * Get all reviews for a specific restaurant
  */
-module.exports.getReviewsForRestaurant = restaurant_id =>
-  reviewObjectStore().then(objStore =>
+module.exports.getReviews = restaurant_id =>
+  idbPromise.then(objStore =>
     objStore
-      .index("restaurant_id") // index we're searching
-      // what are we searching for
+      .transaction(REVIEWS)
+      .objectStore(REVIEWS)
+      .index("restaurant_id")
       .getAll(restaurant_id)
+  );
+/**
+ * Get all reviews 
+ */
+module.exports.getAllReviews = () =>
+  idbPromise.then(objStore =>
+    objStore
+      .transaction(REVIEWS)
+      .objectStore(REVIEWS)
+      .getAll()
   );
 
 /**
  * Saves a new review for a restaurant.
  * @param {array[object]} reviews
  */
-const addReviewForRestaurant = review =>
-  reviewObjectStoreWithReadWrite().then(store => {
+module.exports.addReview = review =>
+  idbPromise.then(objStore => {
+    const store = objStore
+      .transaction(REVIEWS, "readwrite")
+      .objectStore(REVIEWS);
+    review.id = Date.now();
     store.add(review);
     return review;
   });
 
-// Update a review
-const updateReview = review =>
-  reviewObjectStoreWithReadWrite().then(store => {
-    store.put(review, review.id);
-    return review;
+/**
+ * Saves reviews from fetch
+ * @param {array[object]} reviews
+ */
+module.exports.addReviews = reviews =>
+  idbPromise.then(objStore => {
+    const store = objStore
+      .transaction(REVIEWS, "readwrite")
+      .objectStore(REVIEWS);
+    reviews.map(review => {
+      store.put(review);
+    });
+    return reviews;
   });
-// Delete a review
-const deleteReview = review =>
-  reviewObjectStoreWithReadWrite().then(store => {
-    store.delete(review.id);
+
+/**
+ * Updates a review
+ * @param {*} review
+ */
+module.exports.updateReview = review =>
+  idbPromise.then(objStore => {
+    const store = objStore
+      .transaction(REVIEWS, "readwrite")
+      .objectStore(REVIEWS);
+    store.put(review, review.id);
     return review;
   });
 
 /**
+ * Delete a review
+ * @param {*} review
+ */
+module.exports.deleteReview = review =>
+  idbPromise.then(objStore => {
+    const store = objStore
+      .transaction(REVIEWS, "readwrite")
+      .objectStore(REVIEWS);
+    store.delete(review.id);
+    return review;
+  });
+
+/*******************************************************************************
  * Restaurants
  */
-const getRestaurants = () =>
+module.exports.getRestaurants = () =>
   idbPromise.then(objStore =>
     objStore
       .transaction(RESTAURANTS)
@@ -94,7 +133,7 @@ const getRestaurants = () =>
       .getAll()
   );
 
-const getRestaurantById = id =>
+module.exports.getRestaurantById = id =>
   idbPromise.then(objStore =>
     objStore
       .transaction(RESTAURANTS)
@@ -102,22 +141,38 @@ const getRestaurantById = id =>
       .get(id)
   );
 
-const setRestaurants = new_restaurants =>
+module.exports.getFavoriteRestaurant = () =>
+  idbPromise.then(objStore =>
+    objStore
+      .transaction(RESTAURANTS)
+      .objectStore(RESTAURANTS)
+      .index("is_favorite")
+      .get("true")
+  );
+
+module.exports.addRestaurants = new_restaurants =>
   idbPromise.then(objStore => {
     const store = objStore
       .transaction(RESTAURANTS, "readwrite")
       .objectStore(RESTAURANTS);
+    console.log("New restaurants: ", new_restaurants);
+
     new_restaurants.map(restaurant => {
-      store.add(restaurant);
+      store.put(restaurant);
     });
     return new_restaurants;
   });
 
 /**
  * Unresolved - reviews that failed to post to server
+ * ```
+ * method,
+ * url,
+ * body
+ * ```
  */
 // add unresolved review
-const addUnresolvedReview = review =>
+module.exports.addUnresolvedReview = review =>
   idbPromise.then(objStore => {
     const store = objStore
       .transaction(UNRESOLVED, "readwrite")

@@ -1,4 +1,6 @@
-const validator = require("validator");
+import validator from "validator";
+import idbhelper from "./idbhelper";
+import { resolve } from "dns";
 /**
  * DB Helper means to me that it provides data information to the client. It
  * should provide data from indexedDB first for a faster response time then
@@ -6,6 +8,9 @@ const validator = require("validator");
  * and the client ui.
  */
 class DBHelper {
+  /*****************************************************************************
+   * Helper functions
+   */
   /**
    * Restaurant databalse url.
    */
@@ -53,8 +58,8 @@ class DBHelper {
     let isValid = true;
     if (
       !review ||
-      !Number.isInteger(review.restaurant_id) ||
-      !Number.isInteger(review.rating) ||
+      !Number.isInteger(Number(review.restaurant_id)) ||
+      !Number.isInteger(Number(review.rating)) ||
       !(review.rating > 0 && review.rating < 6) ||
       !validator.isAlpha(review.name) ||
       !validator.isLength(review.comments, { min: 1, max: 140 })
@@ -68,12 +73,15 @@ class DBHelper {
    * Helper method for making asyncronous get requests.
    */
   static goGet(url = "", errorMessage = "Error: ") {
-    if (url.length < 7) return;
-    console.log(`GET ${url}`);
+    if (url.length < 7) {
+      return new Promise((resolve, reject) => {
+        reject(`Url: ${url} is invalid.`);
+      });
+    }
 
     return fetch(url)
       .then(res => {
-        if (!res.ok || res.status > 300) {
+        if (!res.ok) {
           throw new Error(res.statusText);
         }
         return res.json();
@@ -89,7 +97,16 @@ class DBHelper {
    * Method insipired by https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch#Supplying_request_options
    */
   static goPost(url = "", data = {}, errorMessage = "Error: ") {
-    if (url.length > 7 || Object.keys(data).length === 0) return;
+    if (url.length > 7 || Object.keys(data).length === 0) {
+      console.log("Post url failed.", url, data);
+      return new Promise((resolve, reject) => {
+        if (url.length > 7) {
+          reject(`Url provided ${url}, is invalid`);
+        } else {
+          reject(`Provided an empty object to post.`);
+        }
+      });
+    }
     return fetch(url, {
       method: "POST",
       headers: {
@@ -185,16 +202,32 @@ class DBHelper {
     );
   }
 
+  /*****************************************************************************
+   * Review Functions
+   */
+
   /**
    * Fetch the reviews for a specific restaurant
    * @param {number} id
    */
-  static getReviewsByRestaurant(id) {
-    if (!Number.isInteger(Number(id))) return;
-    return DBHelper.goGet(
+  static getReviewsByRestaurant(id, callback) {
+    // Validate the id
+    if (!Number.isInteger(Number(id))) {
+      // If the id is invalid return with error.
+      callback(new Error(`ID: ${id} is not a valid id.`), null);
+    }
+
+    // Fetch the review from the server.
+    DBHelper.goGet(
       `${DBHelper.REVIEW_DB_URL}/?restaurant_id=${id}`,
       "❗💩 Error fetching reviews for restaurant: "
-    );
+    )
+      .then(reviews => {
+        callback(null, reviews);
+      })
+      .catch(err => {
+        callback(err, null);
+      });
   }
 
   /**
@@ -223,35 +256,78 @@ class DBHelper {
    * Post a new review to the server
    * @param {object} review
    */
-  static setReview(review) {
+  static addReview(review, callback) {
+    if (!DBHelper.isValidReview(review)) {
+      console.log("Review failed validation: ", review);
+      callback(new Error(`Review: ${review} is invalid`), null);
+      return;
+    }
+
+    // Escape name and comments
+    review.name = validator.escape(review.name);
+    review.comments = validator.escape(review.comments);
+
+    // Add review to indexedDB
+    idbhelper
+      .addReview(review)
+      .then(() => {
+        // Add review to external server
+        DBHelper.goPost(
+          DBHelper.REVIEW_DB_URL,
+          review,
+          "❗💩 Error posting review: "
+        )
+          .then(res => {
+            // good.
+            callback(null, res);
+          })
+          .catch(err => {
+            // If posting to external server failed add to pending indexedDB.
+            idbhelper
+              .addUnresolvedReview(review)
+              .then(() => {
+                callback(err, review);
+              })
+              .catch(err => {
+                callback(err, null);
+              });
+          });
+      })
+      .catch(err => {
+        // Failed to add to indexedDB just abort
+        callback(err, null);
+      });
+  }
+
+  /**
+   * Update a review
+   * @param {number} id
+   * @param {object} review
+   */
+  static updateReview(id, review) {
+    if (!Number.isInteger(Number(id))) return;
     if (!DBHelper.isValidReview(review)) return;
 
     // Escape name and comments
     review.name = validator.escape(review.name);
     review.comments = validator.escape(review.comments);
 
-    return DBHelper.goPost(
-      DBHelper.REVIEW_DB_URL,
-      review,
-      "❗💩 Error posting review: "
-    );
+    return DBHelper.goPut(`${DBHelper.REVIEW_DB_URL}/${id}`, review);
   }
 
   /**
-   *
-   * @param {number} restaurant_id
-   * @param {error, array[object]} callback
+   * Delete a review
+   * @param {number} id
    */
-  static fetchReviewsByRestaurant(restaurant_id, callback) {
-    if (!Number.isInteger(Number(restaurant_id))) return;
-    DBHelper.getReviewsByRestaurant(restaurant_id)
-      .then(reviews => {
-        callback(null, reviews);
-      })
-      .catch(err => {
-        callback(err, null);
-      });
+  static deleteReview(id) {
+    if (!Number.isInteger(Number(id))) return;
+
+    return DBHelper.goDelete(`${DBHelper.REVIEW_DB_URL}/${id}`);
   }
+
+  /*****************************************************************************
+   * Restaurant functions
+   */
 
   /**
    * Favorite a restaurant
@@ -273,32 +349,6 @@ class DBHelper {
     return DBHelper.goPut(
       `${DBHelper.RESTAURANT_DB_URL}/${id}/?is_favorite=false`
     );
-  }
-
-  /**
-   * Update a review
-   * @param {number} id
-   * @param {object} review
-   */
-  static setUpdatedReview(id, review) {
-    if (!Number.isInteger(Number(id))) return;
-    if (!DBHelper.isValidReview(review)) return;
-
-    // Escape name and comments
-    review.name = validator.escape(review.name);
-    review.comments = validator.escape(review.comments);
-
-    return DBHelper.goPut(`${DBHelper.REVIEW_DB_URL}/${id}`, review);
-  }
-
-  /**
-   * Delete a review
-   * @param {number} id
-   */
-  static deleteReview(id) {
-    if (!Number.isInteger(Number(id))) return;
-
-    return DBHelper.goDelete(`${DBHelper.REVIEW_DB_URL}/${id}`);
   }
 
   /**
@@ -427,6 +477,10 @@ class DBHelper {
       }
     });
   }
+
+  /*****************************************************************************
+   * Map functions
+   */
 
   /**
    * Map marker for a restaurant.

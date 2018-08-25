@@ -336,6 +336,7 @@ header {
   border-bottom: 1px solid #d9d9d9;
   border-top: 1px solid #fff;
   padding: 10px 20px;
+  width: 100%;
 }
 @media screen and (min-width: 700px) {
   #restaurant-container {
@@ -360,6 +361,22 @@ header {
   letter-spacing: -1px;
   padding-bottom: 1pt;
   text-transform: uppercase;
+}
+
+#review {
+  display: grid;
+  label {
+    display: grid;
+    font-size: 1rem;
+
+    input {
+      margin-bottom: 15px;
+      font-size: 1.1rem;
+    }
+    textarea {
+      font-size: 1.1rem;
+    }
+  }
 }
 
 #reviews-list {
@@ -392,6 +409,10 @@ header {
   grid-template-columns: 1fr 1fr;
   align-items: center;
   margin-bottom: 15px;
+}
+
+.form-input-fail {
+  background: #f23c55;
 }
 
 .reviews-list-header {

@@ -103,7 +103,7 @@ const fillRestaurantHoursHTML = (
  */
 const fillReviewsHTML = () => {
   // Fetch the reviews
-  DBHelper.fetchReviewsByRestaurant(self.restaurant.id, (error, reviews) => {
+  DBHelper.getReviewsByRestaurant(self.restaurant.id, (error, reviews) => {
     if (error) return;
 
     // Make the html
