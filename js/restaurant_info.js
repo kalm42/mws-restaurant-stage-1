@@ -133,6 +133,7 @@ const fillReviewsHTML = () => {
       return;
     }
     const ul = document.getElementById("reviews-list");
+
     reviews.map(review => {
       ul.appendChild(createReviewHTML(review));
     });

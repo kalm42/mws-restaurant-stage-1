@@ -100,6 +100,18 @@ self.addEventListener("fetch", event => {
   );
 });
 
+const sort = reviewArray => {
+  return reviewArray.sort((a, b) => {
+    if (a.updatedAt > b.updatedAt) {
+      return -1;
+    }
+    if (a.updatedAt < b.updatedAt) {
+      return 1;
+    }
+    return 0;
+  });
+};
+
 const handleRestaurantRequest = event => {
   const eventUrl = new URL(event.request.url);
 
@@ -224,17 +236,13 @@ const handleReviewRequest = event => {
     event.respondWith(
       idbhelper.getReviews(id).then(data => {
         // See if data was returned.
-        if (
-          data &&
-          Object.keys(data).length !== 0 &&
-          data.constructor === Object
-        ) {
-          return new Response(JSON.stringify(data));
+        if (data.length > 0) {
+          return new Response(JSON.stringify(sort(data)));
         }
 
         // No data, go fish.
         return fetchAndCacheReviews(event).then(json => {
-          return new Response(JSON.stringify(json));
+          return new Response(JSON.stringify(sort(json)));
         });
       })
     );
@@ -245,12 +253,12 @@ const handleReviewRequest = event => {
     idbhelper.getAllReviews().then(data => {
       // See if data was returned.
       if (data.length > 0) {
-        return new Response(JSON.stringify(data));
+        return new Response(JSON.stringify(sort(data)));
       }
 
       // No data, go fish.
       return fetchAndCacheReviews(event).then(json => {
-        return new Response(JSON.stringify(json));
+        return new Response(JSON.stringify(sort(json)));
       });
     })
   );

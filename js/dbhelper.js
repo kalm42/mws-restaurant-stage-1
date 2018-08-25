@@ -97,7 +97,7 @@ class DBHelper {
    * Method insipired by https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch#Supplying_request_options
    */
   static goPost(url = "", data = {}, errorMessage = "Error: ") {
-    if (url.length > 7 || Object.keys(data).length === 0) {
+    if (url.length < 7 || Object.keys(data).length === 0) {
       console.log("Post url failed.", url, data);
       return new Promise((resolve, reject) => {
         if (url.length > 7) {
@@ -266,32 +266,35 @@ class DBHelper {
     // Escape name and comments
     review.name = validator.escape(review.name);
     review.comments = validator.escape(review.comments);
+    const idbReview = {
+      ...review,
+      createdAt: Date.now(),
+      updatedAt: Date.now()
+    };
 
     // Add review to indexedDB
     idbhelper
-      .addReview(review)
+      .addReview(idbReview)
       .then(() => {
         // Add review to external server
         DBHelper.goPost(
           DBHelper.REVIEW_DB_URL,
           review,
           "❗💩 Error posting review: "
-        )
-          .then(res => {
-            // good.
-            callback(null, res);
-          })
-          .catch(err => {
-            // If posting to external server failed add to pending indexedDB.
-            idbhelper
-              .addUnresolvedReview(review)
-              .then(() => {
-                callback(err, review);
-              })
-              .catch(err => {
-                callback(err, null);
-              });
-          });
+        ).then(res => {
+          if (!res.ok) {
+            const pendingReview = {
+              method: "POST",
+              url: DBHelper.REVIEW_DB_URL,
+              body: review
+            };
+            idbhelper.addPending(pendingReview).then(pending => {
+              callback(pending, res);
+            });
+          }
+          // good.
+          callback(null, res);
+        });
       })
       .catch(err => {
         // Failed to add to indexedDB just abort

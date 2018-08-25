@@ -163,7 +163,7 @@ module.exports.addRestaurants = new_restaurants =>
     return new_restaurants;
   });
 
-/**
+/*******************************************************************************
  * Unresolved - reviews that failed to post to server
  * ```
  * method,
@@ -171,16 +171,23 @@ module.exports.addRestaurants = new_restaurants =>
  * body
  * ```
  */
-// add unresolved review
-module.exports.addUnresolvedReview = review =>
+
+/**
+ * Add a new pending request to the queue
+ */
+module.exports.addPending = request =>
   idbPromise.then(objStore => {
     const store = objStore
       .transaction(UNRESOLVED, "readwrite")
       .objectStore(UNRESOLVED);
-    store.add(review);
-    return review;
+    store.add(request);
+    return request;
   });
-// attempt to post reviews
+
+
+/**
+ * Iterate through pending requests.
+ */
 const next = () => updateReviews();
 const updateReviews = next =>
   idbPromise.then(objStore => {

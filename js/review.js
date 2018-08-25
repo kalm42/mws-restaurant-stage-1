@@ -32,8 +32,8 @@ const handleFormSubmit = e => {
   const name = document.getElementById("name");
   const rating = document.getElementById("rating");
   const comments = document.getElementById("comment");
-  const restaurant_id = getParameterByName("restaurant_id");
-  const review_id = getParameterByName("id");
+  const restaurant_id = Number(getParameterByName("restaurant_id"));
+  const review_id = Number(getParameterByName("id"));
   if (review_id) isUpdate = true;
 
   // Clear any previous errors.
@@ -51,8 +51,8 @@ const handleFormSubmit = e => {
   const review = {
     name: name.value,
     restaurant_id: restaurant_id,
-    rating: rating.value,
-    comments: comments.value
+    rating: Number(rating.value),
+    comments: comments.value,
   };
 
   // Check if this is an update if yes, then add the id to the object.
@@ -62,7 +62,7 @@ const handleFormSubmit = e => {
   console.log("The Review: ", review);
 
   // Validate the form
-  const isValid = validateForm(review);
+  const isValid = validateForm();
 
   // If valid post/update review.
   if (isValid) {
@@ -102,37 +102,37 @@ const gotoRestaurantDetails = () => {
   window.location.href = `/${path}`;
 };
 
-const validateForm = review => {
+const validateForm = () => {
   // Errors will be an array of mistakes to correct.
   let errors = [];
-  const name = document.getElementById("name");
-  const rating = document.getElementById("rating");
-  const comments = document.getElementById("comment");
+  const name = document.getElementById("name").value;
+  const rating = document.getElementById("rating").value;
+  const comments = document.getElementById("comment").value;
   // name min:1, max: 25, must be alpha, no numbers.
-  if (!validator.isLength(review.name, { min: 1, max: 25 })) {
+  if (!validator.isLength(name, { min: 1, max: 25 })) {
     errors.push(
       `Name must be between 1 and 25 characters. You entered ${
-        review.name.length
+        name.length
       }`
     );
     name.setAttribute("class", "form-input-fail");
   }
-  if (!validator.isAlpha(review.name)) {
+  if (!validator.isAlpha(name)) {
     errors.push(
       "Name must be only letters A-Z, a-z. No numbers or special characters."
     );
     name.setAttribute("class", "form-input-fail");
   }
   // rating only whole integer, min 1, max 5;
-  if (!validator.isInt(review.rating, { min: 1, max: 5 })) {
+  if (!validator.isInt(rating, { min: 1, max: 5 })) {
     errors.push("Rating must be a whole number between 1 and 5.");
     rating.setAttribute("class", "form-input-fail");
   }
   // comments. min: 1, max: 140;
-  if (!validator.isLength(review.comments, { min: 10, max: 140 })) {
+  if (!validator.isLength(comments, { min: 10, max: 140 })) {
     errors.push(
       `Your comment must be between 10 and 140 characters. You have ${
-        review.comments.length
+        comments.length
       } characters.`
     );
     comments.setAttribute("class", "form-input-fail");
