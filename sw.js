@@ -204,11 +204,16 @@ const fetchAndCacheRestaurants = event =>
 
 const handleReviewRequest = event => {
   const eventUrl = new URL(event.request.url);
+  console.log("review request url", eventUrl);
 
   // get review by id
-  if (eventUrl.pathname.split("/").filter(path => Number(path) > 0)) {
+  if (eventUrl.pathname.split("/").filter(path => Number(path) > 0).length > 0) {
+    console.log("FEtching a specific review");
+
     let id = eventUrl.pathname.split("/").filter(path => Number(path) > 0);
     id = Number(id[0]);
+    console.log("Review ID: ", id);
+
     event.respondWith(
       // Must be fetched, we need the id from the api to properly update.
       fetchAndCacheReviews(event).then(json => {

@@ -206,15 +206,28 @@ module.exports.processPending = () =>
           method: pendingRequest.method,
           body: JSON.stringify(pendingRequest.body)
         });
-        fetch(request).then(res => {
-          if (!res.ok) return;
-
-          idbPromise.then(objStore => {
-            const store = objStore
-              .transaction(UNRESOLVED, "readwrite")
-              .objectStore(UNRESOLVED);
-            store.delete(pendingRequest.id);
+        fetch(request)
+          .then(res => {
+            if (!res.ok) return;
+            // Remove the pending transaction.
+            idbPromise.then(objStore => {
+              const store = objStore
+                .transaction(UNRESOLVED, "readwrite")
+                .objectStore(UNRESOLVED);
+              store.delete(pendingRequest.id);
+            });
+            // Return the server's entry
+            return res.json();
+          })
+          .then(entry => {
+            // Replace the dirty entry with a nice one fetched from the server
+            idbPromise.then(objStore => {
+              const store = objStore
+                .transaction(pendingRequest.foreignStore, "readwrite")
+                .objectStore(pendingRequest.foreignStore);
+              store.delete(pendingRequest.foreignKey);
+              store.put(entry);
+            });
           });
-        });
       });
     });

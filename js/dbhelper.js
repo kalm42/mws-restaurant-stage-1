@@ -256,6 +256,8 @@ class DBHelper {
           review,
           "❗💩 Error posting review: "
         ).then(res => {
+          console.log(res);
+          
           if (!res.ok) {
             const pendingReview = {
               foreignKey: storedReview.id,
