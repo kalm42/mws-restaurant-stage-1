@@ -220,12 +220,15 @@ module.exports.processPending = () =>
             return res.json();
           })
           .then(entry => {
+            console.log("Pending request: ", pendingRequest);
+
             // Replace the dirty entry with a nice one fetched from the server
             idbPromise.then(objStore => {
               const store = objStore
                 .transaction(pendingRequest.foreignStore, "readwrite")
                 .objectStore(pendingRequest.foreignStore);
               store.delete(pendingRequest.foreignKey);
+              if (pendingRequest.method === "DELETE") return;
               store.put(entry);
             });
           });

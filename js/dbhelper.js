@@ -158,7 +158,11 @@ class DBHelper {
    * Helper method for making asyncronous delete requests.
    */
   static goDelete(url = "", errorMessage = "Error: ") {
-    if (url.length > 7) return;
+    if (url.length < 7) {
+      return new Promise((resolve, reject) => {
+        reject(`Url: ${url} is invalid.`);
+      });
+    }
     return fetch(url, {
       method: "DELETE"
     })
@@ -166,7 +170,7 @@ class DBHelper {
         if (!res.ok || res.status > 300) {
           throw new Error(res.statusText);
         }
-        return res.json();
+        return res
       })
       .catch(err => {
         console.log(errorMessage, err);
@@ -317,7 +321,7 @@ class DBHelper {
           });
         }
         // Update idb
-        idbhelper.updateReview(review)
+        idbhelper.updateReview(review);
         callback(null, review);
       }
     );
@@ -327,10 +331,29 @@ class DBHelper {
    * Delete a review
    * @param {number} id
    */
-  static deleteReview(id) {
-    if (!Number.isInteger(Number(id))) return;
+  static deleteReview(review, callback) {
+    if (!Number.isInteger(Number(review.id))) return;
 
-    return DBHelper.goDelete(`${DBHelper.REVIEW_DB_URL}/${id}`);
+    idbhelper.deleteReview(review).then(() => {
+      DBHelper.goDelete(`${DBHelper.REVIEW_DB_URL}/${review.id}`).then(res => {
+        console.log("Response: ", res);
+
+        if (!res.ok) {
+          // Add to pending
+          const pendingReview = {
+            foreignKey: review.id,
+            foreignStore: "reviews",
+            method: "DELETE",
+            url: `${DBHelper.REVIEW_DB_URL}/${review.id}`
+          };
+          idbhelper.addPending(pendingReview).then(pending => {
+            callback(pending, res);
+          });
+          callback("Added to pending", review);
+        }
+        callback(null, review);
+      });
+    });
   }
 
   /*****************************************************************************

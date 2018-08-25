@@ -395,7 +395,10 @@ header {
 }
 .button {
   background-color: orange;
+  border-top: none;
+  border-right: none;
   border-bottom: 3px solid #eee;
+  border-left: none;
   color: #fff;
   display: inline-block;
   font-size: 10pt;
@@ -403,6 +406,10 @@ header {
   text-align: center;
   text-decoration: none;
   text-transform: uppercase;
+}
+#buttons {
+  display: grid;
+  grid-auto-flow: column;
 }
 .reviews-header {
   display: grid;

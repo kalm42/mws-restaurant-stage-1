@@ -29,11 +29,9 @@ window.addEventListener("load", event => {
 
 const handleFormSubmit = e => {
   e.preventDefault();
-
   // Assume it's a new review unless proven otherwise.
   let isUpdate = false;
 
-  
   // Things to keep
   const name = document.getElementById("name");
   const rating = document.getElementById("rating");
@@ -238,10 +236,10 @@ const fetchRestaurantFromURL = callback => {
       fillRestaurantHTML(restaurant);
       callback(null, restaurant);
     });
-    const reviewId = getParameterByName("id");
-    if (!reviewId) {
-      return;
-    }
+  }
+
+  const reviewId = getParameterByName("id");
+  if (reviewId) {
     console.log("Review ID: ", reviewId);
 
     DBHelper.getReviewById(Number(reviewId), (err, review) => {
@@ -251,6 +249,7 @@ const fetchRestaurantFromURL = callback => {
         return;
       }
       console.log("Returned review: ", review);
+
       self.review = review;
       const name = document.getElementById("name");
       const rating = document.getElementById("rating");
@@ -258,6 +257,34 @@ const fetchRestaurantFromURL = callback => {
       name.value = review.name;
       rating.value = review.rating;
       comments.value = review.comments;
+
+      // Add delete button
+      // const form = document.getElementById("review");
+      const form = document.getElementById("buttons");
+      const deleteButton = document.createElement("button");
+      deleteButton.setAttribute("class", "button");
+      deleteButton.style.background = "#f23c55";
+      deleteButton.innerHTML = "delete";
+      deleteButton.onclick = deleteReview;
+      form.appendChild(deleteButton);
+    });
+  }
+};
+
+const deleteReview = e => {
+  e.preventDefault(); // Don't submit the form.
+
+  const confirmed = window.confirm(
+    "Are you sure you want to delete this review?"
+  );
+  console.log("Review to delete: ", self.review);
+
+  if (confirmed && self.review) {
+    DBHelper.deleteReview(self.review, (err, review) => {
+      if (err && !review) {
+        return;
+      }
+      gotoRestaurantDetails();
     });
   }
 };
