@@ -57,7 +57,7 @@ module.exports.getReviews = restaurant_id =>
       .getAll(restaurant_id)
   );
 /**
- * Get all reviews 
+ * Get all reviews
  */
 module.exports.getAllReviews = () =>
   idbPromise.then(objStore =>
@@ -184,54 +184,35 @@ module.exports.addPending = request =>
     return request;
   });
 
-
 /**
  * Iterate through pending requests.
  */
-const next = () => updateReviews();
-const updateReviews = next =>
-  idbPromise.then(objStore => {
-    const url = "http://localhost:1337/reviews";
-    const method = "POST";
-    const store = objStore
-      .transaction(UNRESOLVED, "readwrite")
-      .objectStore(UNRESOLVED);
-    store.openCursor().then(cursor => {
-      if (!cursor) return;
-      // Validate cursor
-      const review = cursor.value;
-      const properties = {
-        method,
-        body: JSON.stringify(review)
-      };
-
-      // Now attempt to post the review
-      fetch(url, properties)
-        .then(res => {
-          // If there was a problem posting the review skip to next.
-          if (!res.ok && res.status !== 201) return;
-        })
-        .then(() => {
-          // remove posted review
-          cursor
-            .delete()
-            .then(() => {
-              next();
-            })
-            .catch(err => {
-              console.log(
-                "❗💩 there was an error deleting the posted review from indexedDB.\nError: ",
-                err
-              );
-              return;
-            });
-        })
-        .catch(err => {
-          console.log(
-            "❗💩 there was an error posting the review to the server.\nError: ",
-            err
-          );
-          return;
+module.exports.processPending = () =>
+  idbPromise
+    .then(objStore =>
+      objStore
+        .transaction(UNRESOLVED)
+        .objectStore(UNRESOLVED)
+        .getAll()
+    )
+    .then(pendingRequests => {
+      if (!pendingRequests || pendingRequests.length < 1) {
+        return;
+      }
+      pendingRequests.map(pendingRequest => {
+        const request = new Request(pendingRequest.url, {
+          method: pendingRequest.method,
+          body: JSON.stringify(pendingRequest.body)
         });
+        fetch(request).then(res => {
+          if (!res.ok) return;
+
+          idbPromise.then(objStore => {
+            const store = objStore
+              .transaction(UNRESOLVED, "readwrite")
+              .objectStore(UNRESOLVED);
+            store.delete(pendingRequest.id);
+          });
+        });
+      });
     });
-  });

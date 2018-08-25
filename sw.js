@@ -48,6 +48,7 @@ self.addEventListener("activate", e => {
 });
 
 self.addEventListener("fetch", event => {
+  idbhelper.processPending()
   // Only cache GET requests.
   if (event.request.method !== "GET") {
     event.respondWith(fetch(event.request));
