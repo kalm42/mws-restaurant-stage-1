@@ -33,6 +33,7 @@ const handleFormSubmit = e => {
   // Assume it's a new review unless proven otherwise.
   let isUpdate = false;
 
+  
   // Things to keep
   const name = document.getElementById("name");
   const rating = document.getElementById("rating");
@@ -63,6 +64,8 @@ const handleFormSubmit = e => {
   // Check if this is an update if yes, then add the id to the object.
   if (isUpdate) {
     review.id = self.review.id;
+    review.createdAt = self.review.createdAt;
+    review.updatedAt = Date.now();
   }
   console.log("The Review: ", review);
 
@@ -72,9 +75,10 @@ const handleFormSubmit = e => {
   // If valid post/update review.
   if (isValid) {
     if (isUpdate) {
-      //   DBHelper.updateReview(review, (err, review) => {
-      //     //   Do things
-      //   });
+      DBHelper.updateReview(review, (err, review) => {
+        //   Do things
+        gotoRestaurantDetails();
+      });
     } else {
       DBHelper.addReview(review, (err, review) => {
         if (err && !review) {
@@ -238,10 +242,12 @@ const fetchRestaurantFromURL = callback => {
     if (!reviewId) {
       return;
     }
+    console.log("Review ID: ", reviewId);
+
     DBHelper.getReviewById(Number(reviewId), (err, review) => {
       if (err) {
         // fetch failed, inform user comments can only be edited while online.
-        console.log("Review fetch failed.");
+        console.log("Review fetch failed.", err);
         return;
       }
       console.log("Returned review: ", review);

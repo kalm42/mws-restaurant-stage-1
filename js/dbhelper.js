@@ -130,7 +130,11 @@ class DBHelper {
    * Helper method for making asyncronous put requests.
    */
   static goPut(url = "", data = {}, errorMessage = "Error: ") {
-    if (url.length > 7) return;
+    if (url.length < 7) {
+      return new Promise((resolve, reject) => {
+        reject(`Url: ${url} is invalid.`);
+      });
+    }
     return fetch(url, {
       method: "PUT",
       headers: {
@@ -219,9 +223,12 @@ class DBHelper {
       `${DBHelper.REVIEW_DB_URL}/${id}`,
       "❗💩 Error fetching review: "
     ).then(res => {
-      if (!res.ok) {
-        callback(new Error("failed to retrieve review"), null);
-      }
+      // if (!res.ok) {
+      //   callback(
+      //     new Error(`failed to retrieve review: ${res.ok}, id: ${id}`),
+      //     null
+      //   );
+      // }
       callback(null, res);
     });
   }
@@ -257,7 +264,7 @@ class DBHelper {
           "❗💩 Error posting review: "
         ).then(res => {
           console.log(res);
-          
+
           if (!res.ok) {
             const pendingReview = {
               foreignKey: storedReview.id,
@@ -285,15 +292,35 @@ class DBHelper {
    * @param {number} id
    * @param {object} review
    */
-  static updateReview(id, review) {
-    if (!Number.isInteger(Number(id))) return;
+  static updateReview(review, callback) {
+    console.log("Review to update: ", review);
+
     if (!DBHelper.isValidReview(review)) return;
 
     // Escape name and comments
     review.name = validator.escape(review.name);
     review.comments = validator.escape(review.comments);
 
-    return DBHelper.goPut(`${DBHelper.REVIEW_DB_URL}/${id}`, review);
+    DBHelper.goPut(`${DBHelper.REVIEW_DB_URL}/${review.id}`, review).then(
+      res => {
+        if (!res.ok) {
+          // Add to pending.
+          const pendingReview = {
+            foreignKey: review.id,
+            foreignStore: "reviews",
+            method: "POST",
+            url: `${DBHelper.REVIEW_DB_URL}/${review.id}`,
+            body: review
+          };
+          idbhelper.addPending(pendingReview).then(pending => {
+            callback(pending, res);
+          });
+        }
+        // Update idb
+        idbhelper.updateReview(review)
+        callback(null, review);
+      }
+    );
   }
 
   /**

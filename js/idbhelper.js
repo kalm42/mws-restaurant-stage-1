@@ -105,7 +105,7 @@ module.exports.updateReview = review =>
     const store = objStore
       .transaction(REVIEWS, "readwrite")
       .objectStore(REVIEWS);
-    store.put(review, review.id);
+    store.put(review);
     return review;
   });
 
