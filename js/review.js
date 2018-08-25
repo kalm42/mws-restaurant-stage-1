@@ -1,3 +1,4 @@
+import "@babel/polyfill";
 import DBHelper from "./dbhelper";
 import validator from "validator";
 
@@ -21,6 +22,10 @@ window.initMap = () => {
     }
   });
 };
+
+window.addEventListener("load", event => {
+  DBHelper.processPending();
+});
 
 const handleFormSubmit = e => {
   e.preventDefault();
@@ -57,7 +62,7 @@ const handleFormSubmit = e => {
 
   // Check if this is an update if yes, then add the id to the object.
   if (isUpdate) {
-    review.id = review_id;
+    review.id = self.review.id;
   }
   console.log("The Review: ", review);
 
@@ -228,6 +233,25 @@ const fetchRestaurantFromURL = callback => {
       }
       fillRestaurantHTML(restaurant);
       callback(null, restaurant);
+    });
+    const reviewId = getParameterByName("id");
+    if (!reviewId) {
+      return;
+    }
+    DBHelper.getReviewById(Number(reviewId), (err, review) => {
+      if (err) {
+        // fetch failed, inform user comments can only be edited while online.
+        console.log("Review fetch failed.");
+        return;
+      }
+      console.log("Returned review: ", review);
+      self.review = review;
+      const name = document.getElementById("name");
+      const rating = document.getElementById("rating");
+      const comments = document.getElementById("comment");
+      name.value = review.name;
+      rating.value = review.rating;
+      comments.value = review.comments;
     });
   }
 };

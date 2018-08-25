@@ -170,38 +170,6 @@ class DBHelper {
       });
   }
 
-  /**
-   * Get all of the available restaurants from the server.
-   */
-  static getAllRestaurants() {
-    return DBHelper.goGet(
-      DBHelper.RESTAURANT_DB_URL,
-      "❗💩 Error fetching all restaurants: "
-    );
-  }
-
-  /**
-   * Get all of the user's favorited restaurants.
-   */
-  static getFavoriteRestaurants() {
-    return DBHelper.goGet(
-      `${DBHelper.RESTAURANT_DB_URL}/?is_favorite=true`,
-      "❗💩 Error fetching favorite restaurants: "
-    );
-  }
-
-  /**
-   * Fetch restaurant details for a specific restaurant from the server.
-   * @param {number} id
-   */
-  static getRestaurantById(id) {
-    if (!Number.isInteger(Number(id))) return;
-    return DBHelper.goGet(
-      `${DBHelper.RESTAURANT_DB_URL}/${id}`,
-      "❗💩 Error fetching restaurant by id: "
-    );
-  }
-
   /*****************************************************************************
    * Review Functions
    */
@@ -244,12 +212,18 @@ class DBHelper {
    * Fetch a specific review from the server
    * @param {number} id
    */
-  static getReviewById(id) {
+  static getReviewById(id, callback) {
     if (!Number.isInteger(Number(id))) return;
-    return DBHelper.goGet(
+
+    DBHelper.goGet(
       `${DBHelper.REVIEW_DB_URL}/${id}`,
       "❗💩 Error fetching review: "
-    );
+    ).then(res => {
+      if (!res.ok) {
+        callback(new Error("failed to retrieve review"), null);
+      }
+      callback(null, res);
+    });
   }
 
   /**
@@ -275,7 +249,7 @@ class DBHelper {
     // Add review to indexedDB
     idbhelper
       .addReview(idbReview)
-      .then(() => {
+      .then(storedReview => {
         // Add review to external server
         DBHelper.goPost(
           DBHelper.REVIEW_DB_URL,
@@ -284,6 +258,8 @@ class DBHelper {
         ).then(res => {
           if (!res.ok) {
             const pendingReview = {
+              foreignKey: storedReview.id,
+              foreignStore: "reviews",
               method: "POST",
               url: DBHelper.REVIEW_DB_URL,
               body: review
@@ -331,6 +307,38 @@ class DBHelper {
   /*****************************************************************************
    * Restaurant functions
    */
+
+  /**
+   * Get all of the available restaurants from the server.
+   */
+  static getAllRestaurants() {
+    return DBHelper.goGet(
+      DBHelper.RESTAURANT_DB_URL,
+      "❗💩 Error fetching all restaurants: "
+    );
+  }
+
+  /**
+   * Get all of the user's favorited restaurants.
+   */
+  static getFavoriteRestaurants() {
+    return DBHelper.goGet(
+      `${DBHelper.RESTAURANT_DB_URL}/?is_favorite=true`,
+      "❗💩 Error fetching favorite restaurants: "
+    );
+  }
+
+  /**
+   * Fetch restaurant details for a specific restaurant from the server.
+   * @param {number} id
+   */
+  static getRestaurantById(id) {
+    if (!Number.isInteger(Number(id))) return;
+    return DBHelper.goGet(
+      `${DBHelper.RESTAURANT_DB_URL}/${id}`,
+      "❗💩 Error fetching restaurant by id: "
+    );
+  }
 
   /**
    * Favorite a restaurant
@@ -497,6 +505,13 @@ class DBHelper {
       animation: google.maps.Animation.DROP
     });
     return marker;
+  }
+
+  /*****************************************************************************
+   * Pending Functions
+   */
+  static async processPending() {
+    await idbhelper.processPending();
   }
 }
 

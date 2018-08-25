@@ -48,7 +48,6 @@ self.addEventListener("activate", e => {
 });
 
 self.addEventListener("fetch", event => {
-  idbhelper.processPending()
   // Only cache GET requests.
   if (event.request.method !== "GET") {
     event.respondWith(fetch(event.request));
@@ -207,24 +206,13 @@ const handleReviewRequest = event => {
   const eventUrl = new URL(event.request.url);
 
   // get review by id
-  if (eventUrl.searchParams.get("id")) {
-    let id = eventUrl.searchParams.get("id");
+  if (eventUrl.pathname.split("/").filter(path => Number(path) > 0)) {
+    let id = eventUrl.pathname.split("/").filter(path => Number(path) > 0);
     id = Number(id[0]);
     event.respondWith(
-      idbhelper.getReview(id).then(data => {
-        // See if data was returned.
-        if (
-          data &&
-          Object.keys(data).length !== 0 &&
-          data.constructor === Object
-        ) {
-          return new Response(JSON.stringify(data));
-        }
-
-        // No data, go fish.
-        return fetchAndCacheReviews(event).then(json => {
-          return new Response(JSON.stringify(json));
-        });
+      // Must be fetched, we need the id from the api to properly update.
+      fetchAndCacheReviews(event).then(json => {
+        return new Response(JSON.stringify(json));
       })
     );
     return;

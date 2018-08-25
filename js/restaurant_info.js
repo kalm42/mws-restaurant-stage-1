@@ -1,3 +1,4 @@
+import "@babel/polyfill";
 import DBHelper from "./dbhelper";
 import moment from "moment";
 
@@ -22,6 +23,10 @@ window.initMap = () => {
     }
   });
 };
+
+window.addEventListener("load", event => {
+  DBHelper.processPending();
+});
 
 /**
  * Get current restaurant from page URL.
@@ -134,7 +139,7 @@ const fillReviewsHTML = () => {
     }
     const ul = document.getElementById("reviews-list");
 
-    reviews.map(review => {
+    sort(reviews).map(review => {
       ul.appendChild(createReviewHTML(review));
     });
     container.appendChild(ul);
@@ -204,4 +209,18 @@ const getParameterByName = (name, url) => {
   if (!results) return null;
   if (!results[2]) return "";
   return decodeURIComponent(results[2].replace(/\+/g, " "));
+};
+
+const sort = reviewArray => {
+  return reviewArray.sort((a, b) => {
+    const aDate = new Date(a.updatedAt);
+    const bDate = new Date(b.updatedAt);
+    if (aDate > bDate) {
+      return -1;
+    }
+    if (aDate < bDate) {
+      return 1;
+    }
+    return 0;
+  });
 };

@@ -1,3 +1,4 @@
+import "@babel/polyfill";
 import DBHelper from "./dbhelper";
 
 // Next two lines take from ->
@@ -17,7 +18,6 @@ const lazyload = image => {
   image.src = src;
 };
 const io = new IntersectionObserver(entries => {
-  console.log(entries);
   entries.map(entry => {
     if (entry.isIntersecting) {
       // handle loading of element.
@@ -34,6 +34,7 @@ const io = new IntersectionObserver(entries => {
 document.addEventListener("DOMContentLoaded", event => {
   fetchNeighborhoods();
   fetchCuisines();
+  DBHelper.processPending();
 });
 
 /**

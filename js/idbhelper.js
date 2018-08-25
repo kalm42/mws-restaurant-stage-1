@@ -166,6 +166,8 @@ module.exports.addRestaurants = new_restaurants =>
 /*******************************************************************************
  * Unresolved - reviews that failed to post to server
  * ```
+ * foriegnKey
+ * foriegnStore
  * method,
  * url,
  * body
