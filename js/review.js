@@ -52,7 +52,7 @@ const handleFormSubmit = e => {
     name: name.value,
     restaurant_id: restaurant_id,
     rating: Number(rating.value),
-    comments: comments.value,
+    comments: comments.value
   };
 
   // Check if this is an update if yes, then add the id to the object.
@@ -76,20 +76,10 @@ const handleFormSubmit = e => {
           // Everything failed.
           console.log("Review post error: ", err);
           // TODO: Update user that shit failed and they should try again.
+          return;
         }
-        if (err && review) {
-          // If both are returned that means the application is offline.
-          // TODO: Update the ui that they're offline and their review
-          // is pending.
-          // gotoRestaurantDetails();
-        }
-        console.log(err);
-        // If no error then everything was fine.
-        console.log(review);
-        // TODO: If everything goes correctly I want to be on the
-        // restaurant details page looking at my review with a green
-        // notification or a red notification saying the review is pending.
-        // gotoRestaurantDetails();
+        // If everything didn't fail we can go back to the restaurant details.
+        gotoRestaurantDetails();
       });
     }
   }
@@ -97,7 +87,6 @@ const handleFormSubmit = e => {
 
 const gotoRestaurantDetails = () => {
   const restaurant_id = getParameterByName("restaurant_id");
-  const hostname = window.location.hostname;
   const path = `restaurant.html?id=${restaurant_id}#restaurant-container`;
   window.location.href = `/${path}`;
 };
@@ -111,9 +100,7 @@ const validateForm = () => {
   // name min:1, max: 25, must be alpha, no numbers.
   if (!validator.isLength(name, { min: 1, max: 25 })) {
     errors.push(
-      `Name must be between 1 and 25 characters. You entered ${
-        name.length
-      }`
+      `Name must be between 1 and 25 characters. You entered ${name.length}`
     );
     name.setAttribute("class", "form-input-fail");
   }
@@ -251,7 +238,15 @@ const fetchRestaurantFromURL = callback => {
  */
 const fillBreadcrumb = (restaurant = self.restaurant) => {
   const breadcrumb = document.getElementById("breadcrumb");
+  const restaurant_id = getParameterByName("restaurant_id");
+  const path = `restaurant.html?id=${restaurant_id}#restaurant-container`;
+  const a = document.createElement("a");
+  a.href = path;
+  a.innerHTML = restaurant.name;
+  const rest = document.createElement("li");
+  rest.appendChild(a);
+  breadcrumb.appendChild(rest);
   const li = document.createElement("li");
-  li.innerHTML = restaurant.name;
+  li.innerHTML = "Review Form";
   breadcrumb.appendChild(li);
 };
