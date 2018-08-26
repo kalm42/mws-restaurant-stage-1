@@ -26,6 +26,21 @@ window.initMap = () => {
 
 window.addEventListener("load", event => {
   DBHelper.processPending();
+  DBHelper.getPending().then(pending => {
+    if (pending.length > 0) {
+      const main = document.getElementById("maincontent");
+      // make pending notification.
+      const notification = document.createElement("section");
+      notification.setAttribute("class", "pending");
+
+      const message = document.createElement("p");
+      message.innerHTML = `Offline: ${pending.length} pending requests.`;
+
+      notification.appendChild(message);
+
+      main.appendChild(notification);
+    }
+  });
 });
 
 /**

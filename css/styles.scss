@@ -497,12 +497,26 @@ header {
   color: #666;
 }
 
-@media screen and (max-width: 400px) {
-  background-color: red;
-}
-@media screen and (min-width: 400px) and (max-width: 600px) {
-  background: green;
-}
-@media screen and (min-width: 600px) {
-  background: blue;
+// @media screen and (max-width: 400px) {
+//   background-color: red;
+// }
+// @media screen and (min-width: 400px) and (max-width: 600px) {
+//   background: green;
+// }
+// @media screen and (min-width: 600px) {
+//   background: blue;
+// }
+
+.pending {
+  position: sticky;
+  bottom: 0;
+  height: 60px;
+  background: #f23c55;
+  width: 100%;
+  display: grid;
+  align-items: center;
+  justify-items: center;
+  p {
+    color: #ccc;
+  }
 }

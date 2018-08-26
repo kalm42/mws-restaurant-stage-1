@@ -155,7 +155,7 @@ module.exports.updateRestaurant = restaurant => {
     const store = objStore
       .transaction(RESTAURANTS, "readwrite")
       .objectStore(RESTAURANTS);
-    store.put(restaurant)
+    store.put(restaurant);
   });
 };
 
@@ -194,6 +194,14 @@ module.exports.addPending = request =>
     store.add(request);
     return request;
   });
+
+module.exports.getPending = () =>
+  idbPromise.then(objStore =>
+    objStore
+      .transaction(UNRESOLVED)
+      .objectStore(UNRESOLVED)
+      .getAll()
+  );
 
 /**
  * Iterate through pending requests.

@@ -1,6 +1,5 @@
 import validator from "validator";
 import idbhelper from "./idbhelper";
-import { resolve } from "dns";
 /**
  * DB Helper means to me that it provides data information to the client. It
  * should provide data from indexedDB first for a faster response time then
@@ -354,6 +353,13 @@ class DBHelper {
         callback(null, review);
       });
     });
+  }
+
+  /*****************************************************************************
+   * Pending Function
+   */
+  static getPending() {
+    return idbhelper.getPending();
   }
 
   /*****************************************************************************

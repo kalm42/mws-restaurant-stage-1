@@ -96,7 +96,7 @@ gulp.task("scripts", done => {
         .require(file)
         .bundle()
         .pipe(source(file))
-        // .pipe(streamify(uglify()))
+        .pipe(streamify(uglify()))
         .pipe(gulp.dest("./build"));
     });
     es.merge(tasks).on("end", done);
@@ -114,13 +114,9 @@ gulp.task("serviceWorker", () => {
       .require(paths.serviceWorker.src)
       .bundle()
       .pipe(source(paths.serviceWorker.src))
-      // .pipe(streamify(uglify()))
+      .pipe(streamify(uglify()))
       .pipe(gulp.dest("./build"))
   );
-  // return gulp
-  //   .src(paths.serviceWorker.src)
-  //   .pipe(minify())
-  //   .pipe(gulp.dest(paths.serviceWorker.dest));
 });
 
 /**
