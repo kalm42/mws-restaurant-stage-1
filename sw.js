@@ -27,7 +27,9 @@ self.addEventListener("install", e => {
           "img/8.jpg",
           "img/9.jpg",
           "img/10.jpg",
-          "img/404.jpg"
+          "img/404.jpg",
+          "img/favorite-empty.png",
+          "img/favorite-full.png"
         ])
       )
   );
@@ -207,7 +209,9 @@ const handleReviewRequest = event => {
   console.log("review request url", eventUrl);
 
   // get review by id
-  if (eventUrl.pathname.split("/").filter(path => Number(path) > 0).length > 0) {
+  if (
+    eventUrl.pathname.split("/").filter(path => Number(path) > 0).length > 0
+  ) {
     console.log("FEtching a specific review");
 
     let id = eventUrl.pathname.split("/").filter(path => Number(path) > 0);

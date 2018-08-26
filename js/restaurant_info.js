@@ -59,17 +59,50 @@ const fetchRestaurantFromURL = callback => {
  * Create restaurant HTML and add it to the webpage
  */
 const fillRestaurantHTML = (restaurant = self.restaurant) => {
+  // Name
   const name = document.getElementById("restaurant-name");
   name.innerHTML = restaurant.name;
 
+  // Address
   const address = document.getElementById("restaurant-address");
   address.innerHTML = restaurant.address;
 
+  // Picture
   const image = document.getElementById("restaurant-img");
   image.className = "restaurant-img";
   image.alt = restaurant.name;
   image.src = DBHelper.imageUrlForRestaurant(restaurant);
 
+  // Favorite
+  const fav = document.getElementById("restaurant-favorite");
+  fav.alt = `${restaurant.name} is${
+    restaurant.is_favorite ? "" : " not"
+  } a favorite restaurant of yours.`;
+  fav.setAttribute(
+    "class",
+    restaurant.is_favorite ? "isFavorite" : "isNotFavorite"
+  );
+  fav.setAttribute("aria-pressed", restaurant.is_favorite);
+  fav.addEventListener("click", () => {
+    DBHelper.toggleFavorite(restaurant, (err, restaurant) => {
+      if (!err) {
+        const fav = document.getElementById("restaurant-favorite");
+        fav.alt = `${restaurant.name} is${
+          restaurant.is_favorite ? "" : " not"
+        } a favorite restaurant of yours.`;
+        fav.setAttribute(
+          "class",
+          restaurant.is_favorite ? "isFavorite" : "isNotFavorite"
+        );
+        fav.setAttribute("aria-pressed", restaurant.is_favorite);
+      } else {
+        // Present error message.
+        window.alert("Failed to update favorite.");
+      }
+    });
+  });
+
+  // Cuisine
   const cuisine = document.getElementById("restaurant-cuisine");
   cuisine.innerHTML = restaurant.cuisine_type;
 

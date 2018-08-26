@@ -127,6 +127,11 @@ window.addEventListener("scroll", function(event) {
  * Update page and map for current restaurants.
  */
 const updateRestaurants = () => {
+  // Correct the header height.
+  const navs = document.getElementsByTagName("nav");
+  const nav = navs[0];
+  nav.style.height = "80px";
+
   const cSelect = document.getElementById("cuisines-select");
   const nSelect = document.getElementById("neighborhoods-select");
 

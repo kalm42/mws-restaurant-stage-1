@@ -150,6 +150,15 @@ module.exports.getFavoriteRestaurant = () =>
       .get("true")
   );
 
+module.exports.updateRestaurant = restaurant => {
+  idbPromise.then(objStore => {
+    const store = objStore
+      .transaction(RESTAURANTS, "readwrite")
+      .objectStore(RESTAURANTS);
+    store.put(restaurant)
+  });
+};
+
 module.exports.addRestaurants = new_restaurants =>
   idbPromise.then(objStore => {
     const store = objStore

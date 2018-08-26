@@ -170,7 +170,7 @@ class DBHelper {
         if (!res.ok || res.status > 300) {
           throw new Error(res.statusText);
         }
-        return res
+        return res;
       })
       .catch(err => {
         console.log(errorMessage, err);
@@ -396,22 +396,23 @@ class DBHelper {
    * Favorite a restaurant
    * @param {number} id
    */
-  static setFavorite(id) {
-    if (!Number.isInteger(Number(id))) return;
-    return DBHelper.goPut(
-      `${DBHelper.RESTAURANT_DB_URL}/${id}/?is_favorite=true`
-    );
-  }
-
-  /**
-   * Unfavorite a restaurant
-   * @param {number} id
-   */
-  static unsetFavorite(id) {
-    if (!Number.isInteger(Number(id))) return;
-    return DBHelper.goPut(
-      `${DBHelper.RESTAURANT_DB_URL}/${id}/?is_favorite=false`
-    );
+  static toggleFavorite(restaurant, callback) {
+    DBHelper.goPut(
+      restaurant.is_favorite
+        ? `${DBHelper.RESTAURANT_DB_URL}/${restaurant.id}/?is_favorite=false`
+        : `${DBHelper.RESTAURANT_DB_URL}/${restaurant.id}/?is_favorite=true`
+    ).then(res => {
+      console.log(res);
+      if (!res.ok) {
+        callback("Bad request", null);
+        return;
+      }
+      restaurant.is_favorite = !restaurant.is_favorite;
+      // Update idbindexed record.
+      idbhelper.updateRestaurant(restaurant);
+      // good.
+      callback(null, restaurant);
+    });
   }
 
   /**

@@ -180,6 +180,7 @@ nav h1 a {
 }
 
 /* ====================== Restaurant Listing ====================== */
+
 #restaurants-list {
   background-color: #f3f3f3;
   list-style: outside none none;
@@ -234,17 +235,20 @@ nav h1 a {
   font-size: 11pt;
 }
 
-#restaurants-list li a {
-  background-color: orange;
-  border-bottom: 3px solid #eee;
-  color: #fff;
-  display: inline-block;
-  font-size: 10pt;
-  margin: 15px 0 0;
-  padding: 8px 30px 10px;
-  text-align: center;
-  text-decoration: none;
-  text-transform: uppercase;
+#restaurants-list li {
+  display: grid;
+  a {
+    background-color: orange;
+    border-bottom: 3px solid #eee;
+    color: #fff;
+    display: inline-block;
+    font-size: 10pt;
+    margin: 15px 0 0;
+    padding: 8px 30px 10px;
+    text-align: center;
+    text-decoration: none;
+    text-transform: uppercase;
+  }
 }
 
 /* ====================== Restaurant Details ====================== */
@@ -295,6 +299,26 @@ header {
   .restaurants-container {
     width: calc(33vw);
   }
+}
+
+#restaurant-header {
+  display: grid;
+  grid-template-columns: 1fr 30px;
+  align-items: center;
+}
+
+#restaurant-favorite {
+  height: 30px;
+  width: 30px;
+  border: none;
+}
+.isFavorite {
+  background: url("/img/favorite-full.png");
+  background-size: contain;
+}
+.isNotFavorite {
+  background: url("/img/favorite-empty.png");
+  background-size: contain;
 }
 
 #restaurant-name {
