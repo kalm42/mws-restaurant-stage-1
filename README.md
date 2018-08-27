@@ -2,6 +2,11 @@
 
 ---
 
+### Getting Started
+
+1. In this folder, run `npm install`, `gulp`, then `node ./server.js`
+2. With your server running, visit the site: `http://localhost:8000`, and look around for a bit.
+
 #### _Three Stage Course Material Project - Restaurant Reviews_
 
 ## Project Overview: Stage 3
@@ -46,9 +51,4 @@ For **Stage Two**
 * Performance: >70
 * Accessibility: >90
 
-### What do I do from here?
 
-1. In this folder, run `npm install` then `gulp`
-2. With your server running, visit the site: `http://localhost:8000`, and look around for a bit to see what the current experience looks like.
-3. Explore the provided code, and start making a plan to implement the required features in three areas: responsive design, accessibility and offline use.
-4. Write code to implement the updates to get this site on its way to being a mobile-ready website.

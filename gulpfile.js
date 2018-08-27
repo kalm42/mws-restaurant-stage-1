@@ -3,7 +3,6 @@ const sass = require("gulp-sass");
 const autoprefixer = require("gulp-autoprefixer");
 const babel = require("gulp-babel");
 const concat = require("gulp-concat");
-const connect = require("gulp-connect");
 const del = require("del");
 const browserify = require("browserify");
 const babelify = require("babelify");
@@ -73,7 +72,6 @@ gulp.task("styles", () => {
         browsers: ["last 2 versions"]
       }).on("error", error => errorHandler(error))
     )
-    .pipe(concat("styles.css").on("error", error => errorHandler(error)))
     .pipe(minify())
     .pipe(
       gulp.dest(paths.styles.dest).on("error", error => errorHandler(error))
@@ -108,15 +106,13 @@ gulp.task("scripts", done => {
  */
 gulp.task("serviceWorker", () => {
   // Bundle required files for browser rendering.
-  return (
-    browserify({ entries: [paths.serviceWorker.src] })
-      .transform("babelify", { presets: ["@babel/preset-env"] })
-      .require(paths.serviceWorker.src)
-      .bundle()
-      .pipe(source(paths.serviceWorker.src))
-      .pipe(streamify(uglify()))
-      .pipe(gulp.dest("./build"))
-  );
+  return browserify({ entries: [paths.serviceWorker.src] })
+    .transform("babelify", { presets: ["@babel/preset-env"] })
+    .require(paths.serviceWorker.src)
+    .bundle()
+    .pipe(source(paths.serviceWorker.src))
+    .pipe(streamify(uglify()))
+    .pipe(gulp.dest("./build"));
 });
 
 /**

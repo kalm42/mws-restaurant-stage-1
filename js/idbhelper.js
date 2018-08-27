@@ -45,6 +45,7 @@ module.exports.getReview = id =>
       .objectStore(REVIEWS)
       .get(id)
   );
+  
 /**
  * Get all reviews for a specific restaurant
  */
@@ -56,6 +57,7 @@ module.exports.getReviews = restaurant_id =>
       .index("restaurant_id")
       .getAll(restaurant_id)
   );
+
 /**
  * Get all reviews
  */
@@ -164,7 +166,6 @@ module.exports.addRestaurants = new_restaurants =>
     const store = objStore
       .transaction(RESTAURANTS, "readwrite")
       .objectStore(RESTAURANTS);
-    console.log("New restaurants: ", new_restaurants);
 
     new_restaurants.map(restaurant => {
       store.put(restaurant);
@@ -237,8 +238,6 @@ module.exports.processPending = () =>
             return res.json();
           })
           .then(entry => {
-            console.log("Pending request: ", pendingRequest);
-
             // Replace the dirty entry with a nice one fetched from the server
             idbPromise.then(objStore => {
               const store = objStore

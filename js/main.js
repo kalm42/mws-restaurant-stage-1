@@ -61,7 +61,6 @@ const fetchNeighborhoods = () => {
 
   DBHelper.fetchNeighborhoods((error, neighborhoods) => {
     if (error) {
-      // Got an error
       console.error(error);
     } else {
       self.neighborhoods = neighborhoods;

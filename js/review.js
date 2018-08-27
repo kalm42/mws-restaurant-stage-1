@@ -7,7 +7,7 @@ window.initMap = () => {
   fetchRestaurantFromURL((error, restaurant) => {
     if (error) {
       // Got an error!
-      console.log(error);
+      console.error(error);
     } else {
       self.map = new google.maps.Map(document.getElementById("map"), {
         zoom: 16,
@@ -64,8 +64,6 @@ const handleFormSubmit = e => {
     comments.removeAttribute("class");
   }
 
-  console.log("Review ID: ", review_id);
-
   // Assemble the review object for saving.
   const review = {
     name: name.value,
@@ -80,7 +78,6 @@ const handleFormSubmit = e => {
     review.createdAt = self.review.createdAt;
     review.updatedAt = Date.now();
   }
-  console.log("The Review: ", review);
 
   // Validate the form
   const isValid = validateForm();
@@ -96,8 +93,6 @@ const handleFormSubmit = e => {
       DBHelper.addReview(review, (err, review) => {
         if (err && !review) {
           // Everything failed.
-          console.log("Review post error: ", err);
-          // TODO: Update user that shit failed and they should try again.
           return;
         }
         // If everything didn't fail we can go back to the restaurant details.
@@ -255,15 +250,13 @@ const fetchRestaurantFromURL = callback => {
 
   const reviewId = getParameterByName("id");
   if (reviewId) {
-    console.log("Review ID: ", reviewId);
 
     DBHelper.getReviewById(Number(reviewId), (err, review) => {
       if (err) {
         // fetch failed, inform user comments can only be edited while online.
-        console.log("Review fetch failed.", err);
+        console.error(err);
         return;
       }
-      console.log("Returned review: ", review);
 
       self.review = review;
       const name = document.getElementById("name");
@@ -292,7 +285,6 @@ const deleteReview = e => {
   const confirmed = window.confirm(
     "Are you sure you want to delete this review?"
   );
-  console.log("Review to delete: ", self.review);
 
   if (confirmed && self.review) {
     DBHelper.deleteReview(self.review, (err, review) => {

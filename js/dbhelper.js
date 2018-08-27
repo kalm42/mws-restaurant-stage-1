@@ -1,59 +1,42 @@
 import validator from "validator";
 import idbhelper from "./idbhelper";
 /**
- * DB Helper means to me that it provides data information to the client. It
- * should provide data from indexedDB first for a faster response time then
- * if that fails check the backend server for information updating indexeddb
- * and the client ui.
+ * DB Helper manages transering data between the ui logic and our api.
  */
 class DBHelper {
   /*****************************************************************************
    * Helper functions
    */
-  /**
-   * Restaurant databalse url.
-   */
+  // Restaurant databalse url.
   static get RESTAURANT_DB_URL() {
     const port = 1337; // Change this to your server port
     return `http://localhost:${port}/restaurants`;
   }
 
-  /**
-   * Review database url.
-   */
+  // Review database url.
   static get REVIEW_DB_URL() {
     const port = 1337;
     return `http://localhost:${port}/reviews`;
   }
 
-  /**
-   * Restaurant page URL.
-   */
+  // Restaurant page URL.
   static urlForRestaurant(restaurant) {
     return `./restaurant.html?id=${restaurant.id}`;
   }
 
-  /**
-   * Restaurant image URL.
-   */
+  // Restaurant image URL.
   static imageUrlForRestaurant(restaurant) {
     return `/img/${restaurant.photograph || 404}.jpg`;
   }
 
-  /**
-   * Helper method for validating review objects.
-   * @param {object} review
-   */
+  // Helper method for validating review objects.
   static isValidReview(review) {
-    // Validate review object structure.
-    // ```
     // {
     //     "restaurant_id": <restaurant_id>,
     //     "name": <reviewer_name>,
     //     "rating": <rating>,
     //     "comments": <comment_text>
     // }
-    // ```
     let isValid = true;
     if (
       !review ||
@@ -68,9 +51,7 @@ class DBHelper {
     return isValid;
   }
 
-  /**
-   * Helper method for making asyncronous get requests.
-   */
+  // Helper method for making asyncronous get requests.
   static goGet(url = "", errorMessage = "Error: ") {
     if (url.length < 7) {
       return new Promise((resolve, reject) => {
@@ -86,18 +67,14 @@ class DBHelper {
         return res.json();
       })
       .catch(err => {
-        console.log(errorMessage, err);
         return err;
       });
   }
 
-  /**
-   * Helper method for making asyncronous post requests.
-   * Method insipired by https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch#Supplying_request_options
-   */
+  // Helper method for making asyncronous post requests.
+  // Method insipired by https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch#Supplying_request_options
   static goPost(url = "", data = {}, errorMessage = "Error: ") {
     if (url.length < 7 || Object.keys(data).length === 0) {
-      console.log("Post url failed.", url, data);
       return new Promise((resolve, reject) => {
         if (url.length > 7) {
           reject(`Url provided ${url}, is invalid`);
@@ -120,14 +97,11 @@ class DBHelper {
         return res.json();
       })
       .catch(err => {
-        console.log(errorMessage, err);
         return err;
       });
   }
 
-  /**
-   * Helper method for making asyncronous put requests.
-   */
+  // Helper method for making asyncronous put requests.
   static goPut(url = "", data = {}, errorMessage = "Error: ") {
     if (url.length < 7) {
       return new Promise((resolve, reject) => {
@@ -148,14 +122,11 @@ class DBHelper {
         return res.json();
       })
       .catch(err => {
-        console.log(errorMessage, err);
         return err;
       });
   }
 
-  /**
-   * Helper method for making asyncronous delete requests.
-   */
+  // Helper method for making asyncronous delete requests.
   static goDelete(url = "", errorMessage = "Error: ") {
     if (url.length < 7) {
       return new Promise((resolve, reject) => {
@@ -171,20 +142,13 @@ class DBHelper {
         }
         return res;
       })
-      .catch(err => {
-        console.log(errorMessage, err);
-        return err;
-      });
   }
 
   /*****************************************************************************
    * Review Functions
    */
 
-  /**
-   * Fetch the reviews for a specific restaurant
-   * @param {number} id
-   */
+  // Fetch the reviews for a specific restaurant
   static getReviewsByRestaurant(id, callback) {
     // Validate the id
     if (!Number.isInteger(Number(id))) {
@@ -205,9 +169,7 @@ class DBHelper {
       });
   }
 
-  /**
-   * Fetch all reviews from the server
-   */
+  // Fetch all reviews from the server
   static getAllReviews() {
     return DBHelper.goGet(
       DBHelper.REVIEW_DB_URL,
@@ -215,10 +177,7 @@ class DBHelper {
     );
   }
 
-  /**
-   * Fetch a specific review from the server
-   * @param {number} id
-   */
+  // Fetch a specific review from the server
   static getReviewById(id, callback) {
     if (!Number.isInteger(Number(id))) return;
 
@@ -226,23 +185,13 @@ class DBHelper {
       `${DBHelper.REVIEW_DB_URL}/${id}`,
       "❗💩 Error fetching review: "
     ).then(res => {
-      // if (!res.ok) {
-      //   callback(
-      //     new Error(`failed to retrieve review: ${res.ok}, id: ${id}`),
-      //     null
-      //   );
-      // }
       callback(null, res);
     });
   }
 
-  /**
-   * Post a new review to the server
-   * @param {object} review
-   */
+  // Post a new review to the server
   static addReview(review, callback) {
     if (!DBHelper.isValidReview(review)) {
-      console.log("Review failed validation: ", review);
       callback(new Error(`Review: ${review} is invalid`), null);
       return;
     }
@@ -266,7 +215,6 @@ class DBHelper {
           review,
           "❗💩 Error posting review: "
         ).then(res => {
-          console.log(res);
 
           if (!res.ok) {
             const pendingReview = {
@@ -290,16 +238,9 @@ class DBHelper {
       });
   }
 
-  /**
-   * Update a review
-   * @param {number} id
-   * @param {object} review
-   */
+  // Update a review
   static updateReview(review, callback) {
-    console.log("Review to update: ", review);
-
     if (!DBHelper.isValidReview(review)) return;
-
     // Escape name and comments
     review.name = validator.escape(review.name);
     review.comments = validator.escape(review.comments);
@@ -326,17 +267,12 @@ class DBHelper {
     );
   }
 
-  /**
-   * Delete a review
-   * @param {number} id
-   */
+  // Delete a review
   static deleteReview(review, callback) {
     if (!Number.isInteger(Number(review.id))) return;
 
     idbhelper.deleteReview(review).then(() => {
       DBHelper.goDelete(`${DBHelper.REVIEW_DB_URL}/${review.id}`).then(res => {
-        console.log("Response: ", res);
-
         if (!res.ok) {
           // Add to pending
           const pendingReview = {
@@ -362,13 +298,16 @@ class DBHelper {
     return idbhelper.getPending();
   }
 
+  // Make the pending network requests.
+  static async processPending() {
+    await idbhelper.processPending();
+  }
+
   /*****************************************************************************
    * Restaurant functions
    */
 
-  /**
-   * Get all of the available restaurants from the server.
-   */
+  // Get all of the available restaurants from the server.
   static getAllRestaurants() {
     return DBHelper.goGet(
       DBHelper.RESTAURANT_DB_URL,
@@ -376,9 +315,7 @@ class DBHelper {
     );
   }
 
-  /**
-   * Get all of the user's favorited restaurants.
-   */
+  // Get all of the user's favorited restaurants.
   static getFavoriteRestaurants() {
     return DBHelper.goGet(
       `${DBHelper.RESTAURANT_DB_URL}/?is_favorite=true`,
@@ -386,10 +323,7 @@ class DBHelper {
     );
   }
 
-  /**
-   * Fetch restaurant details for a specific restaurant from the server.
-   * @param {number} id
-   */
+  // Fetch restaurant details for a specific restaurant from the server.
   static getRestaurantById(id) {
     if (!Number.isInteger(Number(id))) return;
     return DBHelper.goGet(
@@ -398,17 +332,13 @@ class DBHelper {
     );
   }
 
-  /**
-   * Favorite a restaurant
-   * @param {number} id
-   */
+  // Favorite a restaurant
   static toggleFavorite(restaurant, callback) {
     DBHelper.goPut(
       restaurant.is_favorite
         ? `${DBHelper.RESTAURANT_DB_URL}/${restaurant.id}/?is_favorite=false`
         : `${DBHelper.RESTAURANT_DB_URL}/${restaurant.id}/?is_favorite=true`
     ).then(res => {
-      console.log(res);
       if (!res.ok) {
         callback("Bad request", null);
         return;
@@ -421,9 +351,7 @@ class DBHelper {
     });
   }
 
-  /**
-   * Fetch all restaurants.
-   */
+  // Fetch all restaurants.
   static fetchRestaurants(callback) {
     DBHelper.getAllRestaurants()
       .then(json => {
@@ -434,9 +362,7 @@ class DBHelper {
       });
   }
 
-  /**
-   * Fetch a restaurant by its ID.
-   */
+  // Fetch all restaurants.
   static fetchRestaurantById(id, callback) {
     DBHelper.getRestaurantById(id)
       .then(json => {
@@ -447,9 +373,7 @@ class DBHelper {
       });
   }
 
-  /**
-   * Fetch restaurants by a cuisine type with proper error handling.
-   */
+  // Fetch restaurants by a cuisine type with proper error handling.
   static fetchRestaurantByCuisine(cuisine, callback) {
     // Fetch all restaurants  with proper error handling
     DBHelper.fetchRestaurants((error, restaurants) => {
@@ -463,9 +387,7 @@ class DBHelper {
     });
   }
 
-  /**
-   * Fetch restaurants by a neighborhood with proper error handling.
-   */
+  // Fetch restaurants by a neighborhood with proper error handling.
   static fetchRestaurantByNeighborhood(neighborhood, callback) {
     // Fetch all restaurants
     DBHelper.fetchRestaurants((error, restaurants) => {
@@ -479,9 +401,7 @@ class DBHelper {
     });
   }
 
-  /**
-   * Fetch restaurants by a cuisine and a neighborhood with proper error handling.
-   */
+  // Fetch restaurants by a cuisine and a neighborhood with proper error handling.
   static fetchRestaurantByCuisineAndNeighborhood(
     cuisine,
     neighborhood,
@@ -506,9 +426,7 @@ class DBHelper {
     });
   }
 
-  /**
-   * Fetch all neighborhoods with proper error handling.
-   */
+  // Fetch all neighborhoods with proper error handling.
   static fetchNeighborhoods(callback) {
     // Fetch all restaurants
     DBHelper.fetchRestaurants((error, restaurants) => {
@@ -528,9 +446,7 @@ class DBHelper {
     });
   }
 
-  /**
-   * Fetch all cuisines with proper error handling.
-   */
+  // Fetch all cuisines with proper error handling.
   static fetchCuisines(callback) {
     // Fetch all restaurants
     DBHelper.fetchRestaurants((error, restaurants) => {
@@ -552,9 +468,7 @@ class DBHelper {
    * Map functions
    */
 
-  /**
-   * Map marker for a restaurant.
-   */
+  // Map marker for a restaurant.
   static mapMarkerForRestaurant(restaurant, map) {
     const marker = new google.maps.Marker({
       position: restaurant.latlng,
@@ -564,13 +478,6 @@ class DBHelper {
       animation: google.maps.Animation.DROP
     });
     return marker;
-  }
-
-  /*****************************************************************************
-   * Pending Functions
-   */
-  static async processPending() {
-    await idbhelper.processPending();
   }
 }
 

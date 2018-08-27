@@ -2,18 +2,22 @@ const express = require("express");
 const path = require("path");
 const fs = require("fs");
 const http2 = require("spdy");
-const compression = require('compression');
+const compression = require("compression");
+const expressStaticGzip = require("express-static-gzip");
 
 // Express app for serving our gulp'd files.
 const app = express();
 
+app.use(compression());
+
 app.use(express.static(path.join(__dirname, "build")));
 
-app.use(compression())
+// app.use("/", expressStaticGzip(path.join(__dirname), { enableBrotli: true }));
 
-app.get("/testing", function(req, res) {
-  res.send("Hello World");
-});
+
+// app.get("/testing", function(req, res) {
+//   res.send("Hello World");
+// });
 
 const options = {
   key: fs.readFileSync("./server.key"),
@@ -25,7 +29,7 @@ const options = {
 //     console.log(err);
 //   }
 //   console.log(`Listening on port 8000`);
-  
+
 // });
 
 app.set("port", 8000);
